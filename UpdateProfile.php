@@ -14,7 +14,7 @@
             margin: 0;
             padding: 0;
             display: flex;
-            flex-direction: column; /* Biar nav bar duduk kat atas sekali */
+            flex-direction: column;
             min-height: 100vh;
         }
 
@@ -44,7 +44,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Container wrapper untuk bagi form duduk tengah skrin bawah nav bar */
         .main-content {
             flex: 1;
             display: flex;
@@ -56,7 +55,7 @@
         .profile-container {
             background-color: #512b7c;
             width: 100%;
-            max-width: 900px; /* Dibesarkan sikit supaya muat layout 2 column */
+            max-width: 900px;
             padding: 40px;
             border-radius: 24px;
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
@@ -113,11 +112,11 @@
             color: #ff99bb;
         }
       
-        /* Grid System yang lebih stabil */
+        
         .form-section {
             flex: 1;
             display: grid;
-            grid-template-columns: 120px 1fr 120px 1fr; /* Set size lebar label siap-siap */
+            grid-template-columns: 120px 1fr 120px 1fr;
             gap: 15px 15px;
             align-items: center;
         }
@@ -144,14 +143,14 @@
             box-sizing: border-box;
         }
 
-        /* Pembetulan khas untuk wrapper div yang bungkus input skills */
+        
         .skills-wrapper {
             grid-column: span 1;
             width: 100%;
         }
 
         .full-width-row {
-            grid-column: span 3; /* Span 3 baki ruangan grid selepas tolak label */
+            grid-column: span 3; 
         }
 
         .radio-group {
