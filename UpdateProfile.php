@@ -14,7 +14,7 @@
             margin: 0;
             padding: 0;
             display: flex;
-            flex-direction: column;
+            flex-direction: column; /* Biar nav bar duduk kat atas sekali */
             min-height: 100vh;
         }
 
@@ -27,6 +27,22 @@
             justify-content: space-between;
             padding: 0 40px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Logo Interactive Box */
+        .logo-trigger-box {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            border-radius: 8px;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .logo-trigger-box:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: scale(1.03);
         }
 
         .nav-logo-img {
@@ -43,7 +59,56 @@
             text-align: center;
             letter-spacing: 0.5px;
         }
+		
+		/* Floating Sidebar Menu Styling */
+        .sidebar-menu {
+            position: absolute;
+            top: 70px;
+            left: -260px; /* Hidden offscreen initially */
+            width: 240px;
+            background-color: #4A154B;
+            box-shadow: 4px 8px 25px rgba(0, 0, 0, 0.3);
+            border-bottom-right-radius: 12px;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            transition: left 0.3s ease;
+            z-index: 5;
+        }
 
+        /* Active flyout reveal utility */
+        .sidebar-menu.active {
+            left: 0;
+        }
+
+        .sidebar-menu a {
+            color: #FFFFFF;
+            padding: 16px 25px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-left: 4px solid transparent;
+            transition: background 0.2s, border-left 0.2s;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Active item indicator highlighting current location view */
+        .sidebar-menu a.active-view {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid #B4A4EB;
+            font-weight: bold;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.15);
+            margin: 10px 25px;
+        }
+		
+        /* Container wrapper untuk bagi form duduk tengah skrin bawah nav bar */
         .main-content {
             flex: 1;
             display: flex;
@@ -112,11 +177,11 @@
             color: #ff99bb;
         }
       
-        
+        /* Grid System yang lebih stabil */
         .form-section {
             flex: 1;
             display: grid;
-            grid-template-columns: 120px 1fr 120px 1fr;
+            grid-template-columns: 120px 1fr 120px 1fr; /* Set size lebar label siap-siap */
             gap: 15px 15px;
             align-items: center;
         }
@@ -143,14 +208,14 @@
             box-sizing: border-box;
         }
 
-        
+        /* Pembetulan khas untuk wrapper div yang bungkus input skills */
         .skills-wrapper {
             grid-column: span 1;
             width: 100%;
         }
 
         .full-width-row {
-            grid-column: span 3; 
+            grid-column: span 3; /* Span 3 baki ruangan grid selepas tolak label */
         }
 
         .radio-group {
@@ -216,24 +281,29 @@ if (isset($_POST['update'])) {
         <img src="startIT logo.jpg" alt="startIT Menu Logo" class="nav-logo-img">
     </div>
     <div class="header-title">Update Profile</div>
-    <div></div> 
+    <div></div>
+</div>
+
+<div class="sidebar-menu" id="panelSidebar">
+	<a href="UpdateProfile.php" class="active-view">Update Profile</a>
+	<a href="job_vacancy.php">Job Vacancy</a>
+	<a href="applicationStatus.php">Application Status</a>
+	<div class="sidebar-divider"></div>
+	<a href="logout.php" style="color: #FF8A8A; font-size: 0.95rem;">Log Out</a>
 </div>
 	
 <div class="main-content">
     <form method="POST" enctype="multipart/form-data" style="width: 100%; max-width: 900px;">
         <div class="profile-container">
             
-        <div class="avatar-section">
-		<label for="profile_pic_input" style="cursor: pointer;">
-        <div class="avatar-container">
-			<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile Picture">
-        </div>
-        <div class="edit-label">Edit</div>
-		</label>
+            <div class="avatar-section">
+				<label for="profile_picture" class="avatar-container" style="display: block; margin-bottom: 15px;">
+				<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile Picture" style="cursor: pointer;">
+				<input type="file" id="profile_picture" name="profile_picture" class="file-input-wrapper"> </label>
     
-    <input type="file" id="profile_pic_input" name="profile_picture" style="display: none;">
-</div>
-
+				<label for="profile_picture" class="edit-label">Edit</label>
+			</div>
+			
             <div class="form-section">
                 
                 <label for="fullname">Full Name:</label>
@@ -253,8 +323,6 @@ if (isset($_POST['update'])) {
                         <option value="JavaScript">
                         <option value="Python">
                         <option value="Java">
-						<option value="C++">
-						<option value="C">
                         <option value="PHP">
                     </datalist>
                 </div>
@@ -309,6 +377,24 @@ if (isset($_POST['update'])) {
         </div>
     </form>
 </div>
+
+<script>
+        const logoToggle = document.getElementById('logoToggle');
+        const panelSidebar = document.getElementById('panelSidebar');
+
+        // Clicking the icon reveals or conceals the vertical sidebar menu
+        logoToggle.addEventListener('click', function(event) {
+            event.stopPropagation();
+            panelSidebar.classList.toggle('active');
+        });
+
+        // Hides sidebar instantly if clicking out bounds of the navigation elements
+        document.addEventListener('click', function(event) {
+            if (!panelSidebar.contains(event.target) && !logoToggle.contains(event.target)) {
+                panelSidebar.classList.remove('active');
+            }
+        });
+</script>
 
 </body>
 </html>
