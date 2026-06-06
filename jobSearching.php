@@ -53,53 +53,96 @@ $result = mysqli_query($dbconn, $query);
         body {
             background-color: #b7a9f0;
         }
+		
+		/* ===== Navigation Header ===== */
+		.nav-header {
+			background-color: #4f0f69;
+			width: 100%;
+			height: 70px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 0 40px;
+			position: relative;
+			box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+			z-index: 10;
+		}
 
-        /* ===== Top Bar ===== */
-        .top-bar {
-            background-color: #5a2d82;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            color: white;
-            position: relative;
-        }
+		.header-title {
+			color: white;
+			font-size: 1.4rem;
+			font-weight: 500;
+			position: absolute;
+			left: 50%;
+			transform: translateX(-50%);
+		}
 
-        .logo-btn {
-            cursor: pointer;
-            font-size: 28px;
-            margin-right: 20px;
-        }
+		/* ===== Logo Button ===== */
+		.logo-trigger-box {
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 6px;
+			border-radius: 8px;
+			transition: 0.2s;
+		}
 
-        .top-title {
-            flex-grow: 1;
-            text-align: center;
-            font-size: 22px;
-        }
+		.logo-trigger-box:hover {
+			background-color: rgba(255,255,255,0.15);
+		}
 
-        /* ===== Sidebar ===== */
-        .sidebar {
-            position: absolute;
-            top: 70px;
-            left: 0;
-            width: 220px;
-            background-color: #4b1f6f;
-            display: none;
-            flex-direction: column;
-            box-shadow: 4px 4px 10px rgba(0,0,0,0.3);
-            z-index: 10;
-        }
+		.nav-logo-img {
+			width: 45px;
+			height: 45px;
+			object-fit: contain;
+		}
 
-        .sidebar a {
-            padding: 18px;
-            color: white;
-            text-decoration: none;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-        }
+		/* ===== Sidebar ===== */
+		.sidebar-menu {
+			position: absolute;
+			top: 70px;
+			left: -260px;
+			width: 240px;
+			background-color: #4A154B;
+			box-shadow: 4px 8px 25px rgba(0,0,0,0.3);
+			border-bottom-right-radius: 12px;
+			padding: 20px 0;
+			display: flex;
+			flex-direction: column;
+			transition: left 0.3s ease;
+			z-index: 20;
+		}
 
-        .sidebar a:hover {
-            background-color: #6a3fa0;
-        }
+		.sidebar-menu.active {
+			left: 0;
+		}
+
+		.sidebar-menu a {
+			color: white;
+			padding: 16px 25px;
+			text-decoration: none;
+			font-size: 1rem;
+			font-weight: 500;
+			border-left: 4px solid transparent;
+			transition: 0.2s;
+		}
+
+		.sidebar-menu a:hover {
+			background-color: rgba(255,255,255,0.1);
+		}
+
+		.sidebar-menu a.active-view {
+			background-color: rgba(255,255,255,0.15);
+			border-left: 4px solid #B4A4EB;
+			font-weight: bold;
+		}
+
+		.sidebar-divider {
+			height: 1px;
+			background-color: rgba(255,255,255,0.15);
+			margin: 10px 25px;
+		}
 
         /* ===== Main ===== */
         .main {
@@ -229,16 +272,26 @@ $result = mysqli_query($dbconn, $query);
 
 <body>
 
-<!-- ===== Top Bar ===== -->
-<div class="top-bar">
-    <div class="logo-btn" onclick="toggleMenu()">☰</div>
-    <div class="top-title">Job Vacancy</div>
-
-    <div class="sidebar" id="sidebar">
-        <a href="#">Update Profile</a>
-        <a href="menu2.php">Job Vacancy</a>
-        <a href="applicationStatus.php">Application Status</a>
+<div class="nav-header">
+    <div class="logo-trigger-box" id="logoToggle">
+        <img src="startIT logo.jpg" alt="startIT Menu Logo" class="nav-logo-img">
     </div>
+
+    <div class="header-title">Job Vacancy</div>
+
+    <div></div>
+</div>
+
+<div class="sidebar-menu" id="panelSidebar">
+    <a href="update_profile.php">Update Profile</a>
+    <a href="jobSearching.php" class="active-view">Job Vacancy</a>
+    <a href="applicationStatus.php">Application Status</a>
+
+    <div class="sidebar-divider"></div>
+
+    <a href="logout.php" style="color:#FF8A8A; font-size:0.95rem;">
+        Log Out
+    </a>
 </div>
 
 <!-- ===== Main ===== -->
@@ -327,14 +380,21 @@ $result = mysqli_query($dbconn, $query);
 <!-- ===== JavaScript ===== -->
 <script>
 
-function toggleMenu() {
-    const sidebar = document.getElementById("sidebar");
+const logoToggle = document.getElementById('logoToggle');
+const panelSidebar = document.getElementById('panelSidebar');
 
-    sidebar.style.display =
-        sidebar.style.display === "flex"
-        ? "none"
-        : "flex";
-}
+logoToggle.addEventListener('click', function(event) {
+    event.stopPropagation();
+    panelSidebar.classList.toggle('active');
+});
+
+document.addEventListener('click', function(event) {
+    if (!panelSidebar.contains(event.target) &&
+        !logoToggle.contains(event.target)) {
+
+        panelSidebar.classList.remove('active');
+    }
+});
 
 </script>
 
