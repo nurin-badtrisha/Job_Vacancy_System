@@ -50,9 +50,9 @@ if (isset($_POST['update'])) {
             WHERE applicant_id = '$applicant_id'";
 
     if (mysqli_query($conn, $sql)) {
-        echo "<script>alert('Profil berjaya dikemas kini!'); window.location='updateprofile.php';</script>";
+        echo "<script>alert('PROFILE UPDATED !!'); window.location='updateprofile.php';</script>";
     } else {
-        echo "<script>alert('Ralat semasa mengemas kini: " . mysqli_error($conn) . "'); window.location='updateprofile.php';</script>";
+        echo "<script>alert('ERROR DETECTED !! " . mysqli_error($conn) . "'); window.location='updateprofile.php';</script>";
     }
 } else {
     header("Location: updateprofile.php");
