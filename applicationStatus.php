@@ -1,4 +1,11 @@
-<?php require_once 'status.php'; ?>
+<?php
+session_start(); 
+if (!isset($_SESSION['password'])) {
+    // Terus tendang dia pergi page login balik
+    header("Location: login.php");
+    exit();
+}
+require_once 'status.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
