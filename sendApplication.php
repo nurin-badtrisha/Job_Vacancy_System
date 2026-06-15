@@ -1,4 +1,8 @@
-<?php
+<?phpsession_start(); 
+if (!isset($_SESSION['username'])) {
+    header("Location: LogIn.php");
+    exit();
+}
 include("dbconn.php");
 
 $job_id = $_POST['job_id'];
