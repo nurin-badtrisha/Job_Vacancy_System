@@ -6,7 +6,6 @@ if (!isset($_SESSION['username'])) {
 }
 include("dbconn.php");
 
-/* ================= SEARCH & FILTER ================= */
 $search = "";
 $location = "";
 $salary = "";
@@ -35,7 +34,6 @@ if(isset($_GET['search'])){
     }
 }
 
-/* latest post appear first */
 $query .= " ORDER BY posted_date DESC";
 
 $result = mysqli_query($dbconn, $query);
@@ -59,7 +57,6 @@ $result = mysqli_query($dbconn, $query);
             background-color: #b7a9f0;
         }
 		
-		/* ===== Navigation Header ===== */
 		.nav-header {
 			background-color: #4f0f69;
 			width: 100%;
@@ -82,7 +79,6 @@ $result = mysqli_query($dbconn, $query);
 			transform: translateX(-50%);
 		}
 
-		/* ===== Logo Button ===== */
 		.logo-trigger-box {
 			cursor: pointer;
 			display: flex;
@@ -103,7 +99,6 @@ $result = mysqli_query($dbconn, $query);
 			object-fit: contain;
 		}
 
-		/* ===== Sidebar ===== */
 		.sidebar-menu {
 			position: absolute;
 			top: 70px;
@@ -149,7 +144,6 @@ $result = mysqli_query($dbconn, $query);
 			margin: 10px 25px;
 		}
 
-        /* ===== Main ===== */
         .main {
             padding: 60px 20px;
             text-align: center;
@@ -166,7 +160,6 @@ $result = mysqli_query($dbconn, $query);
             font-weight: bold;
         }
 
-        /* ===== Search Box ===== */
         .search-box {
             width: 90%;
             max-width: 900px;
@@ -205,7 +198,6 @@ $result = mysqli_query($dbconn, $query);
             background-color: #6a3fa0;
         }
 
-        /* ===== Cards ===== */
         .cards {
             display: flex;
             justify-content: center;
@@ -299,7 +291,6 @@ $result = mysqli_query($dbconn, $query);
     </a>
 </div>
 
-<!-- ===== Main ===== -->
 <div class="main">
 
     <img src="StartIT.png" width="30%">
@@ -309,7 +300,6 @@ $result = mysqli_query($dbconn, $query);
         <span>Job</span> here!
     </div>
 
-    <!-- ===== SEARCH & FILTER ===== -->
     <div class="search-box">
         <form method="GET">
 
@@ -337,8 +327,6 @@ $result = mysqli_query($dbconn, $query);
 
         </form>
     </div>
-
-    <!-- ===== JOB CARDS ===== -->
 
         <?php
         if(mysqli_num_rows($result) > 0){
@@ -382,7 +370,6 @@ $result = mysqli_query($dbconn, $query);
 
 </div>
 
-<!-- ===== JavaScript ===== -->
 <script>
 
 const logoToggle = document.getElementById('logoToggle');
