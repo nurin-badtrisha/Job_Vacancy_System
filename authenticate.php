@@ -1,6 +1,5 @@
 <?php
 if (!isset($_SESSION['username'])) {
-    // Terus tendang dia pergi page login balik
     header("Location: LogIn.php");
     exit();
 }
