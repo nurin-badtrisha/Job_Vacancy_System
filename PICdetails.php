@@ -15,12 +15,10 @@
         body {
             background-color: #b4bcf4; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column; 
-            align-items: center;   
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .nav-header {
@@ -32,9 +30,24 @@
             justify-content: space-between;
             padding: 0 40px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-            width: 100%;
         }
 
+        /* Logo Interactive Box */
+        .logo-trigger-box {
+            flex: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 6px;
+            border-radius: 8px;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .logo-trigger-box:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: scale(1.03);
+        }
 
         .nav-logo-img {
             width: 45px;
@@ -44,18 +57,23 @@
         }
 
         .header-title {
+            flex: 1;
             color: white;
             font-size: 24px;
             font-weight: bold;
             text-align: center;
             letter-spacing: 0.5px;
         }
+
+        .header-spacer {
+            flex: 1;
+        }
         
         /* Floating Sidebar Menu Styling */
         .sidebar-menu {
             position: absolute;
             top: 70px;
-            left: -260px; 
+            left: -260px;
             width: 240px;
             background-color: #4A154B;
             box-shadow: 4px 8px 25px rgba(0, 0, 0, 0.3);
@@ -67,7 +85,6 @@
             z-index: 5;
         }
 
-        /* Active flyout reveal utility */
         .sidebar-menu.active {
             left: 0;
         }
@@ -86,7 +103,6 @@
             background-color: rgba(255, 255, 255, 0.1);
         }
 
-        /* Active item indicator highlighting current location view */
         .sidebar-menu a.active-view {
             background-color: rgba(255, 255, 255, 0.15);
             border-left: 4px solid #B4A4EB;
@@ -103,7 +119,7 @@
         .container {
             width: 90%;
             max-width: 1000px;
-            margin: auto; 
+            margin: auto;
             padding-top: 20px;
             padding-bottom: 20px;
         }
@@ -145,10 +161,6 @@
             color: #333;
         }
 
-        .search-container input::placeholder {
-            color: #c5bdae;
-        }
-
         /* --- Data Table --- */
         .table-wrapper {
             border: 1px solid #b3a2f2;
@@ -180,13 +192,24 @@
             padding: 18px;
             height: 55px; 
             border-bottom: 1px solid #cbc2f7;
+            font-size: 15px;
+            color: #333;
+            outline: none;
+            transition: background-color 0.2s;
         }
 
         tr:last-child td {
             border-bottom: none;
         }
-		
-		/* --- Button Edit --- */
+
+        /* --- Gaya Visual Apabila Kotak Baris Di-edit --- */
+        tr.editing-row td.editable-cell {
+            background-color: #ffffff; /* Kotak bertukar putih menandakan boleh ditaip */
+            box-shadow: inset 0 0 3px rgba(79, 15, 105, 0.4);
+            color: #000;
+        }
+
+        /* --- Butang Aksi Edit Sebaris --- */
         .btn-action-edit {
             color: #4f0f69;
             text-decoration: none;
@@ -203,11 +226,12 @@
             text-decoration: underline;
         }
 
+        /* Gaya butang apabila bertukar fungsi menjadi Save */
         .btn-action-edit.saving {
             color: #2e7d32; /* Warna hijau */
         }
 
-        /* --- Action Button --- */
+        /* --- Action Button Bawah --- */
         .button-container {
             display: flex;
             justify-content: flex-end;
@@ -215,7 +239,7 @@
             gap: 15px;
         }
 
-        .btn-back {
+        .btn-report {
             background-color: #512da8;
             color: white;
             border: none;
@@ -227,7 +251,7 @@
             transition: background-color 0.2s;
         }
 
-        .btn-back:hover {
+        .btn-report:hover {
             background-color: #3d1f85;
         }
     </style>
@@ -239,10 +263,16 @@
         <img src="startIT logo.jpg" alt="startIT Menu Logo" class="nav-logo-img">
     </div>
     <div class="header-title">PIC Details</div>
-    <div></div>
+    <div class="header-spacer"></div>
 </div>
 
-
+<div class="sidebar-menu" id="panelSidebar">
+    <a href="UpdateProfile.php" class="active-view">Update Profile</a>
+    <a href="job_vacancy.php">Job Vacancy</a>
+    <a href="applicationStatus.php">Application Status</a>
+    <div class="sidebar-divider"></div>
+    <a href="logout.php" style="color: #FF8A8A; font-size: 0.95rem;">Log Out</a>
+</div>
 
 <div class="container">
     <div class="card">
@@ -256,11 +286,11 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 30%;">Company Name</th>
-                        <th style="width: 18%;">Company Email</th>
-                        <th style="width: 25%;">Company Phone Number</th>
+                        <th style="width: 25%;">Company Name</th>
+                        <th style="width: 20%;">Company Email</th>
+                        <th style="width: 20%;">Company Phone Number</th>
                         <th style="width: 20%;">Company Address</th>
-						<th style="width: 15%; text-align: center;">Edit</th> </tr>
+                        <th style="width: 15%; text-align: center;">Edit</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -275,20 +305,31 @@
                             </span>
                         </td>
                     </tr>
+                    <tr>
+                        <td class="editable-cell"></td>
+                        <td class="editable-cell"></td>
+                        <td class="editable-cell"></td>
+                        <td class="editable-cell"></td>
+                        <td style="text-align: center;">
+                            <span class="btn-action-edit" onclick="handleRowEdit(this)">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                            </span>
+                        </td>
+                    </tr>
+                   
                 </tbody>
             </table>
         </div>
 
         <div class="button-container">
-            <button class="btn-back" onclick="window.location.href='adminReport.php'">Back</button>
+            <button class="btn-report" onclick="window.location.href='adminReport.php'">Back</button>
         </div>
 
     </div>
 </div>
 
 <script>
-
- 
+    
     function handleRowEdit(buttonElement) {
        
         const row = buttonElement.closest('tr');
@@ -318,11 +359,22 @@
             buttonElement.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Edit';
             buttonElement.classList.remove('saving');
 
-            alert("Changes saved succesfully!");
+            alert("Perubahan pada baris kotak ini telah berjaya disimpan!");
         }
     }
 
-    
+    const logoToggle = document.getElementById('logoToggle');
+    const panelSidebar = document.getElementById('panelSidebar');
+
+    logoToggle.addEventListener('click', function(event) {
+        event.stopPropagation();
+        panelSidebar.classList.toggle('active');
+    });
+
+    document.addEventListener('click', function(event) {
+        if (!panelSidebar.contains(event.target) && !logoToggle.contains(event.target)) {
+            panelSidebar.classList.remove('active');
+        }
     });
 </script>
 
