@@ -202,14 +202,12 @@
             border-bottom: none;
         }
 
-        /* --- Gaya Visual Apabila Kotak Baris Di-edit --- */
         tr.editing-row td.editable-cell {
-            background-color: #ffffff; /* Kotak bertukar putih menandakan boleh ditaip */
+            background-color: #ffffff;
             box-shadow: inset 0 0 3px rgba(79, 15, 105, 0.4);
             color: #000;
         }
 
-        /* --- Butang Aksi Edit Sebaris --- */
         .btn-action-edit {
             color: #4f0f69;
             text-decoration: none;
@@ -220,18 +218,15 @@
             justify-content: center;
             gap: 6px;
         }
-
+        /* --- Button Edit --- */
         .btn-action-edit:hover {
             color: #3d1f85;
             text-decoration: underline;
         }
-
-        /* Gaya butang apabila bertukar fungsi menjadi Save */
         .btn-action-edit.saving {
             color: #2e7d32; /* Warna hijau */
         }
 
-        /* --- Action Button Bawah --- */
         .button-container {
             display: flex;
             justify-content: flex-end;
@@ -359,7 +354,7 @@
             buttonElement.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Edit';
             buttonElement.classList.remove('saving');
 
-            alert("Perubahan pada baris kotak ini telah berjaya disimpan!");
+            alert("Changes saved successfully!");
         }
     }
 
