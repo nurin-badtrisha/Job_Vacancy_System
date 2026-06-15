@@ -1,5 +1,7 @@
 <?php
 session_start();
+
+// 1. Security Check
 if (!isset($_SESSION['username'])) {
     header("Location: LogIn.php");
     exit();
@@ -9,7 +11,7 @@ if (!isset($_SESSION['username'])) {
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db   = "startit"; // Menghubungkan semula ke pangkalan data projek anda
+$db   = "startit";
 
 $conn = new mysqli($host, $user, $pass, $db);
 
@@ -17,7 +19,7 @@ if ($conn->connect_error) {
     die("Database Connection Failed: " . $conn->connect_error);
 }
 
-// 3. Ambil penapis bulan & tahun (Default: bulan & tahun semasa)
+// 3. Ambil penapis bulan & tahun
 $selected_month = isset($_GET['month']) ? intval($_GET['month']) : intval(date('m'));
 $selected_year  = isset($_GET['year']) ? intval($_GET['year']) : intval(date('Y'));
 
@@ -27,13 +29,13 @@ $months_list = [
     9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
 ];
 
-// 4. Query untuk kira jumlah pemohon mengikut syarikat pada bulan dipilih
+// 4. Query TEPAT mengikut rajah ERD
 $query = "
-    SELECT c.company_name, COUNT(aj.applicant_id) as total_applicants
+    SELECT jp.company_name, COUNT(aj.applicant_id) as total_applicants
     FROM apply_job aj
-    JOIN company c ON aj.company_id = c.company_id
-    WHERE MONTH(aj.apply_date) = ? AND YEAR(aj.apply_date) = ?
-    GROUP BY c.company_id, c.company_name
+    JOIN job_posting jp ON aj.job_id = jp.job_id
+    WHERE MONTH(aj.applied_date) = ? AND YEAR(aj.applied_date) = ?
+    GROUP BY jp.company_name
     ORDER BY total_applicants DESC
 ";
 
@@ -55,7 +57,6 @@ while ($row = $result->fetch_assoc()) {
     }
 }
 
-// Supaya grid graf tak pecah kalau data kosong
 if ($max_applicants == 0) { $max_applicants = 10; }
 ?>
 <!DOCTYPE html>
@@ -63,149 +64,260 @@ if ($max_applicants == 0) { $max_applicants = 10; }
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CampusConnect - Demand Report</title>
+    <title>StartIt</title>
     <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-        body { background-color: #f4f6f9; color: #333; padding: 30px; }
-        .report-container { max-width: 1000px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 40px; }
-        .header-section { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #edf2f7; padding-bottom: 20px; margin-bottom: 30px; }
-        .title-area h1 { font-size: 24px; color: #1a365d; }
-        .title-area p { font-size: 14px; color: #718096; margin-top: 4px; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; }
         
-        /* Filter Form */
-        .filter-form { background: #f7fafc; padding: 15px 20px; border-radius: 8px; border: 1px solid #e2e8f0; display: inline-flex; gap: 15px; align-items: center; margin-bottom: 30px; }
-        .filter-form label { font-size: 14px; font-weight: 600; color: #4a5568; }
-        .filter-form select { padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e0; background: #fff; font-size: 14px; }
-        .btn-filter { background: #3182ce; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; }
-        .btn-filter:hover { background: #2b6cb0; }
-        .btn-print { background: #2f855a; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: 600; }
-        .btn-print:hover { background: #22543d; }
+        /* Background purple cair sebiji macam Canva kau */
+        body { background-color: #b4a7d6; padding-bottom: 50px; }
+        
+/* ===== Navigation Header ===== */
+		.nav-header {
+			background-color: #4f0f69;
+			width: 100%;
+			height: 70px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			padding: 0 40px;
+			position: relative;
+			box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+			z-index: 10;
+		}
 
-        /* Chart & Table CSS */
-        .chart-box { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 25px; margin-bottom: 35px; text-align: center; }
-        .chart-title { font-size: 16px; font-weight: bold; color: #2d3748; margin-bottom: 20px; text-align: left; }
-        .table-section h2 { font-size: 18px; color: #2d3748; margin-bottom: 15px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { text-align: left; padding: 12px 15px; border-bottom: 1px solid #e2e8f0; }
-        th { background-color: #ebf8ff; color: #2b6cb0; font-weight: 600; }
-        tr:hover { background-color: #f7fafc; }
-        .badge-count { background: #e2e8f0; color: #4a5568; padding: 4px 10px; border-radius: 12px; font-weight: bold; font-size: 13px; }
-        .no-data { padding: 40px; text-align: center; color: #a0aec0; font-style: italic; }
+		.header-title {
+			color: white;
+			font-size: 1.4rem;
+			font-weight: 500;
+			position: absolute;
+			left: 50%;
+			transform: translateX(-50%);
+		}
+		
+		/* ===== Logo Button ===== */
+		.logo-trigger-box {
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			padding: 6px;
+			border-radius: 8px;
+			transition: 0.2s;
+		}
 
-        /* Sembunyikan bahagian butang masa print kertas real */
+		.logo-trigger-box:hover {
+			background-color: rgba(255,255,255,0.15);
+		}
+
+		.nav-logo-img {
+			width: 45px;
+			height: 45px;
+			object-fit: contain;
+		}
+
+        /* Kad putih melengkung di tengah */
+        .main-card {
+            max-width: 900px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 30px; /* Lengkungan besar ikut gambar */
+            padding: 35px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        /* Form Filter */
+        .filter-section {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            align-items: center;
+        }
+        .filter-section select {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff8ff;
+        }
+
+        /* Graf Box */
+        .chart-box {
+            border: 1px solid #cccccc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            background-color: #fcfbfe;
+        }
+        .chart-title {
+            font-weight: bold;
+            color: #4c2874;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        /* Jadual Ikut Gaya Canva */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+        th, td {
+            border: 1px solid #a2a2a2; /* Garisan border petak biasa */
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+        }
+        th {
+            background-color: #9999ff; /* Warna ungu biru lembut macam header table kau */
+            color: black;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f0f7;
+        }
+
+        /* Seksyen Butang di Bawah Sebelah Kanan */
+        .button-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        /* Gaya Butang Canva */
+        .btn-canva {
+            background-color: #4c2874;
+            color: white;
+            border: none;
+            padding: 10px 30px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: background 0.2s;
+        }
+        .btn-canva:hover {
+            background-color: #361c54;
+        }
+
+        .no-data {
+            padding: 30px;
+            text-align: center;
+            color: #777;
+            font-style: italic;
+        }
+
         @media print {
-            body { background: #fff; padding: 0; }
-            .report-container { box-shadow: none; padding: 0; }
-            .filter-form, .btn-print { display: none !important; }
+            body { background: white; }
+            .topbar, .filter-section, .button-group { display: none !important; }
+            .main-card { box-shadow: none; margin: 0; padding: 0; width: 100%; }
         }
     </style>
 </head>
 <body>
 
-<div class="report-container">
-    <div class="header-section">
-        <div class="title-area">
-            <h1>Monthly Application Demand Report</h1>
-            <p>UiTM Cawangan Pahang Kampus Raub • CampusConnect System</p>
-        </div>
-        <button class="btn-print" onclick="window.print()">🖨️ Print Report</button>
+<div class="nav-header">
+    <div class="logo-trigger-box" id="logoToggle">
+        <img src="startIT logo.jpg" alt="startIT Menu Logo" class="nav-logo-img">
     </div>
 
-    <!-- Filter Form (Boleh tukar bulan-bulan secara dinamik) -->
-    <form class="filter-form" method="GET" action="">
-        <label for="month">Month:</label>
-        <select name="month" id="month">
-            <?php foreach ($months_list as $num => $name): ?>
-                <option value="<?php echo $num; ?>" <?php echo ($num == $selected_month) ? 'selected' : ''; ?>><?php echo $name; ?></option>
-            <?php endforeach; ?>
-        </select>
+    <div class="header-title">Report</div>
 
-        <label for="year">Year:</label>
-        <select name="year" id="year">
-            <?php 
-            $current_yr = intval(date('Y'));
-            for ($y = $current_yr; $y >= $current_yr - 3; $y--): 
-            ?>
-                <option value="<?php echo $y; ?>" <?php echo ($y == $selected_year) ? 'selected' : ''; ?>><?php echo $y; ?></option>
-            <?php endfor; ?>
-        </select>
-        <button type="submit" class="btn-filter">Filter</button>
-    </form>
+    <div></div>
+</div>
 
-    <!-- Graf Bar Menggunakan SVG (X-axis: Company, Y-axis: Total) -->
-    <div class="chart-box">
-        <div class="chart-title">Company Demand Chart (<?php echo $months_list[$selected_month] . " " . $selected_year; ?>)</div>
-        
-        <?php if (empty($chart_data)): ?>
-            <div class="no-data">No applications recorded for this month.</div>
-        <?php else: 
-            $svg_width = 800; $svg_height = 400;
-            $p_left = 60; $p_right = 40; $p_top = 30; $p_bottom = 60;
-            $plot_w = $svg_width - $p_left - $p_right;
-            $plot_h = $svg_height - $p_top - $p_bottom;
-            
-            $item_count = count($chart_data);
-            $group_w = $plot_w / $item_count;
-            $bar_w = $group_w * 0.6;
-        ?>
-            <svg width="100%" height="100%" viewBox="0 0 <?php echo $svg_width; ?> <?php echo $svg_height; ?>" style="max-height: 380px;">
-                <!-- Garisan Grid Belakang -->
-                <?php for($i = 0; $i <= 5; $i++): 
-                    $y_line = $p_top + $plot_h - ($plot_h / 5) * $i;
-                    $label_y = round(($max_applicants / 5) * $i);
-                ?>
-                    <line x1="<?php echo $p_left; ?>" y1="<?php echo $y_line; ?>" x2="<?php echo $svg_width - $p_right; ?>" y2="<?php echo $y_line; ?>" stroke="#e2e8f0" stroke-dasharray="5,5" />
-                    <text x="<?php echo $p_left - 15; ?>" y="<?php echo $y_line + 4; ?>" font-size="12" fill="#718096" text-anchor="end"><?php echo $label_y; ?></text>
-                <?php endfor; ?>
+    <div class="main-card">
 
-                <!-- Paksi X & Y -->
-                <line x1="<?php echo $p_left; ?>" y1="<?php echo $p_top + $plot_h; ?>" x2="<?php echo $svg_width - $p_right; ?>" y2="<?php echo $p_top + $plot_h; ?>" stroke="#718096" stroke-width="2" />
-                <line x1="<?php echo $p_left; ?>" y1="<?php echo $p_top; ?>" x2="<?php echo $p_left; ?>" y2="<?php echo $p_top + $plot_h; ?>" stroke="#718096" stroke-width="2" />
-
-                <!-- Lukis Graf Bar mengikut Data DB -->
-                <?php foreach ($chart_data as $index => $data): 
-                    $x_pos = $p_left + ($index * $group_w) + ($group_w - $bar_w) / 2;
-                    $bar_h = ($data['total'] / $max_applicants) * $plot_h;
-                    $y_pos = $p_top + $plot_h - $bar_h;
-                ?>
-                    <!-- Tiang Bar -->
-                    <rect x="<?php echo $x_pos; ?>" y="<?php echo $y_pos; ?>" width="<?php echo $bar_w; ?>" height="<?php echo $bar_h; ?>" fill="#3182ce" rx="4" />
-                    <!-- Angka Jumlah Pemohon (Y-Axis Value) -->
-                    <text x="<?php echo $x_pos + $bar_w/2; ?>" y="<?php echo $y_pos - 8; ?>" font-size="12" font-weight="bold" fill="#2b6cb0" text-anchor="middle"><?php echo $data['total']; ?></text>
-                    <!-- Nama Syarikat (X-Axis Label) -->
-                    <text x="<?php echo $x_pos + $bar_w/2; ?>" y="<?php echo $p_top + $plot_h + 25; ?>" font-size="11" font-weight="600" fill="#4a5568" text-anchor="middle">
-                        <?php echo (strlen($data['company']) > 12) ? substr($data['company'], 0, 10).'..' : $data['company']; ?>
-                    </text>
+        <form class="filter-section" method="GET" action="">
+            <label style="font-weight: bold;">Select Month:</label>
+            <select name="month">
+                <?php foreach ($months_list as $num => $name): ?>
+                    <option value="<?php echo $num; ?>" <?php echo ($num == $selected_month) ? 'selected' : ''; ?>><?php echo $name; ?></option>
                 <?php endforeach; ?>
-            </svg>
-        <?php endif; ?>
-    </div>
+            </select>
 
-    <!-- Jadual Ringkasan Berangka -->
-    <div class="table-section">
-        <h2>Detailed Summary Table</h2>
+            <select name="year">
+                <?php 
+                $current_yr = intval(date('Y'));
+                for ($y = $current_yr; $y >= $current_yr - 3; $y--): 
+                ?>
+                    <option value="<?php echo $y; ?>" <?php echo ($y == $selected_year) ? 'selected' : ''; ?>><?php echo $y; ?></option>
+                <?php endfor; ?>
+            </select>
+            <button type="submit" class="btn-canva" style="padding: 5px 15px;">Filter</button>
+        </form>
+
+        <div class="chart-box">
+            <div class="chart-title">Demand Statistics - <?php echo $months_list[$selected_month] . " " . $selected_year; ?></div>
+            
+            <?php if (empty($chart_data)): ?>
+                <div class="no-data">No data available for this month.</div>
+            <?php else: 
+                $svg_width = 800; $svg_height = 300;
+                $p_left = 60; $p_right = 40; $p_top = 20; $p_bottom = 50;
+                $plot_w = $svg_width - $p_left - $p_right;
+                $plot_h = $svg_height - $p_top - $p_bottom;
+                
+                $item_count = count($chart_data);
+                $group_w = $plot_w / $item_count;
+                $bar_w = $group_w * 0.5;
+            ?>
+                <svg width="100%" height="100%" viewBox="0 0 <?php echo $svg_width; ?> <?php echo $svg_height; ?>" style="max-height: 280px;">
+                    <?php for($i = 0; $i <= 4; $i++): 
+                        $y_line = $p_top + $plot_h - ($plot_h / 4) * $i;
+                        $label_y = round(($max_applicants / 4) * $i);
+                    ?>
+                        <line x1="<?php echo $p_left; ?>" y1="<?php echo $y_line; ?>" x2="<?php echo $svg_width - $p_right; ?>" y2="<?php echo $y_line; ?>" stroke="#e0e0e0" stroke-dasharray="4,4" />
+                        <text x="<?php echo $p_left - 10; ?>" y="<?php echo $y_line + 4; ?>" font-size="11; " fill="#666" text-anchor="end"><?php echo $label_y; ?></text>
+                    <?php endfor; ?>
+
+                    <line x1="<?php echo $p_left; ?>" y1="<?php echo $p_top + $plot_h; ?>" x2="<?php echo $svg_width - $p_right; ?>" y2="<?php echo $p_top + $plot_h; ?>" stroke="#555" stroke-width="1.5" />
+                    <line x1="<?php echo $p_left; ?>" y1="<?php echo $p_top; ?>" x2="<?php echo $p_left; ?>" y2="<?php echo $p_top + $plot_h; ?>" stroke="#555" stroke-width="1.5" />
+
+                    <?php foreach ($chart_data as $index => $data): 
+                        $x_pos = $p_left + ($index * $group_w) + ($group_w - $bar_w) / 2;
+                        $bar_h = ($data['total'] / $max_applicants) * $plot_h;
+                        $y_pos = $p_top + $plot_h - $bar_h;
+                    ?>
+                        <rect x="<?php echo $x_pos; ?>" y="<?php echo $y_pos; ?>" width="<?php echo $bar_w; ?>" height="<?php echo $bar_h; ?>" fill="#9999ff" stroke="#4c2874" stroke-width="1" />
+                        <text x="<?php echo $x_pos + $bar_w/2; ?>" y="<?php echo $y_pos - 6; ?>" font-size="11" font-weight="bold" fill="#4c2874" text-anchor="middle"><?php echo $data['total']; ?></text>
+                        <text x="<?php echo $x_pos + $bar_w/2; ?>" y="<?php echo $p_top + $plot_h + 20; ?>" font-size="11" fill="#333" text-anchor="middle">
+                            <?php echo (strlen($data['company']) > 12) ? substr($data['company'], 0, 10).'..' : $data['company']; ?>
+                        </text>
+                    <?php endforeach; ?>
+                </svg>
+            <?php endif; ?>
+        </div>
+
         <table>
             <thead>
                 <tr>
-                    <th style="width: 15%;">Rank</th>
+                    <th style="width: 20%;">Rank</th>
                     <th>Company Name</th>
-                    <th style="text-align: center; width: 30%;">Total Applicants</th>
+                    <th style="width: 30%;">Total Applicants</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($chart_data)): ?>
-                    <tr><td colspan="3" style="text-align: center; color: #a0aec0;">No records found.</td></tr>
+                    <tr><td colspan="3" class="no-data">No data logged.</td></tr>
                 <?php else: $rank = 1; foreach ($chart_data as $data): ?>
                     <tr>
                         <td><strong>#<?php echo $rank++; ?></strong></td>
-                        <td><?php echo htmlspecialchars($data['company']); ?></td>
-                        <td style="text-align: center;"><span class="badge-count"><?php echo $data['total']; ?> applicants</span></td>
+                        <td style="text-align: left; padding-left: 20px;"><?php echo htmlspecialchars($data['company']); ?></td>
+                        <td><strong><?php echo $data['total']; ?></strong></td>
                     </tr>
                 <?php endforeach; endif; ?>
             </tbody>
         </table>
+
+        <div class="button-group">
+            <button class="btn-canva" onclick="window.print()">Print</button>
+            <a href="dashboard.php" class="btn-canva">Back</a>
+        </div>
+
     </div>
-</div>
 
 </body>
 </html>
