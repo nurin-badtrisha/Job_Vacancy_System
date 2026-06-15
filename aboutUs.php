@@ -18,8 +18,11 @@
 </nav>
 
     <div class="about-hero">
-        <h1>StartIT</h1>
-        <p>Your future starts here.</p>
+        <p style = "text-align: center;"> <img src="startIT image.png" alt="" width = "270" height = "95"></p><br>
+        <div class="headline">
+			Find your <span>Dream</span><br>
+			<span>Job</span> here!
+		</div>
     </div>
 
     <div class="container">
@@ -115,15 +118,17 @@ nav ul li a:hover{
             text-align: center;
             padding: 60px 20px;
         }
-        .about-hero h1 {
-            margin: 0;
-            font-size: 3.5rem;
+		
+		.headline {
+            font-size: 45px;
+            color: black;
+            margin-bottom: 40px;
+			font-weight: bold;
         }
-        .about-hero p {
-            font-size: 1.5rem;
-            max-width: 60px;
-            margin: 10px auto 0;
-            opacity: 0.9;
+
+        .headline span {
+            color: #6b4b3e;
+            font-weight: bold;
         }
 
         /* Main Content Container */
