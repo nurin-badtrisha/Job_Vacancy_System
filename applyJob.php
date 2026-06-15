@@ -1,5 +1,10 @@
 <?php
-session_start();
+session_start(); 
+if (!isset($_SESSION['username'])) {
+    // Terus tendang dia pergi page login balik
+    header("Location: LogIn.php");
+    exit();
+}
 include("dbconn.php");
 
 $job_id = isset($_GET['job_id']) ? $_GET['job_id'] : 1;
