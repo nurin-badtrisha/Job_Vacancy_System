@@ -1,9 +1,3 @@
-<?php session_start(); 
-if (!isset($_SESSION['username'])) {
-    header("Location: LogIn.php");
-    exit();
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,69 +10,132 @@ if (!isset($_SESSION['username'])) {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background-color: #b3a2f2; /* Light purple outer background */
+            background-color: #b4bcf4; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column; 
+            align-items: center;   
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
 
-        /* --- Header Section --- */
-        header {
-            background-color: #512da8; /* Dark purple header */
-            color: white;
+        .nav-header {
+            background-color: #4f0f69; 
             width: 100%;
-            padding: 15px 40px;
+            height: 70px;
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 0 40px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            position: relative;
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+      
+
+        .nav-logo-img {
+            width: 45px;
+            height: 45px;
+            display: block;
+            object-fit: contain;
         }
 
-        /* Placeholder logo mimicking the clock icon */
-        .logo-icon {
-            width: 30px;
-            height: 30px;
-            border: 3px dashed white;
-            border-radius: 50%;
-        }
-
-        header h1 {
+      
+        .header-title {
+            color: white;
             font-size: 24px;
-            font-weight: 500;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 0.5px;
+			
+			position: absolute;
+			left: 50%;
+			transform: translateX(-50%);
+			text-align: center;
+			
+			z-index: 10;
+        }
+        
+      
+        .header-nav {
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px; 
+			max-width: 35%;
         }
 
         .header-nav a {
             color: white;
             text-decoration: none;
-            margin-left: 20px;
             font-size: 14px;
             font-weight: 500;
+            transition: text-decoration 0.2s;
         }
 
         .header-nav a:hover {
             text-decoration: underline;
         }
+        
+        /* --- Sidebar Menu  --- */
+        .sidebar-menu {
+            position: absolute;
+            top: 70px;
+            left: -260px;
+            width: 240px;
+            background-color: #4A154B;
+            box-shadow: 4px 8px 25px rgba(0, 0, 0, 0.3);
+            border-bottom-right-radius: 12px;
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            transition: left 0.3s ease;
+            z-index: 5;
+        }
 
+        /* Active flyout reveal utility */
+        .sidebar-menu.active {
+            left: 0;
+        }
+
+        .sidebar-menu a {
+            color: #FFFFFF;
+            padding: 16px 25px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-left: 4px solid transparent;
+            transition: background 0.2s, border-left 0.2s;
+        }
+
+        .sidebar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Active item indicator highlighting current location view */
+        .sidebar-menu a.active-view {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid #B4A4EB;
+            font-weight: bold;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.15);
+            margin: 10px 25px;
+        }
+        
         /* --- Main Content Card --- */
         .container {
             width: 90%;
             max-width: 1000px;
-            margin-top: 40px;
-            margin-bottom: 40px;
+            margin: auto; 
+            padding-top: 20px;
+            padding-bottom: 20px;
         }
 
         .card {
@@ -95,7 +152,7 @@ if (!isset($_SESSION['username'])) {
         .search-container {
             display: flex;
             align-items: center;
-            background-color: #fffdf6; /* Light cream tint matching the image */
+            background-color: #fffdf6; 
             border-radius: 8px;
             padding: 8px 15px;
             width: 100%;
@@ -132,11 +189,11 @@ if (!isset($_SESSION['username'])) {
         table {
             width: 100%;
             border-collapse: collapse;
-            background-color: #f1effd; /* Very light purple table rows */
+            background-color: #f1effd; 
         }
 
         th {
-            background-color: #b3a2f2; /* Light purple header */
+            background-color: #b3a2f2; 
             color: #000000;
             font-weight: bold;
             font-size: 18px;
@@ -145,14 +202,13 @@ if (!isset($_SESSION['username'])) {
             border-bottom: 1px solid #9c8be0;
         }
 
-        /* Ensuring border separation inside the table layout */
         th:not(:last-child), td:not(:last-child) {
             border-right: 1px solid #cbc2f7;
         }
 
         td {
             padding: 18px;
-            height: 55px; /* Keeps rows spacious even when empty */
+            height: 55px; 
             border-bottom: 1px solid #cbc2f7;
         }
 
@@ -161,85 +217,81 @@ if (!isset($_SESSION['username'])) {
         }
 
         /* --- Action Button --- */
-    .btn-primary {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px; 
-        background-color: #3b145a;
-        color: white !important;
-        padding: 10px 20px; 
-        font-size: 14px;
-        font-weight: 600;
-        text-decoration: none;
-        border-radius: 6px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        transition: all 0.2s ease-in-out;
-        cursor: pointer;
-    }
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 5px;
+        }
 
-    /* Kesan bila user letak cursor atas butang (Hover) */
-    .btn-primary:hover {
-        background-color: #3b145a;
-        transform: translateY(-1px); /* Butang naik atas sikit */
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15); /* Bayang jadi tebal sikit */
-    }
+        .btn-report {
+            background-color: #512da8;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
 
-    /* Kesan bila user tekan/klik butang (Active) */
-    .btn-primary:active {
-        transform: translateY(1px); /* Butang nampak macam ditekan ke dalam */
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    }
-		
+        .btn-report:hover {
+            background-color: #3d1f85;
+        }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-left">
-            <div class="logo-icon"></div>
-        </div>
-        <h1>Admin</h1>
-        <nav class="header-nav">
-            <a href="PICdetails.html" class="active-view">View PIC details</a>
-            <a href="registerPIC.php" class="active-view">Register PIC</a>
-        </nav>
-    </header>
-
-    <div class="container">
-        <div class="card">
-            
-            <div class="search-container">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Search for applicant">
-            </div>
-
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 40%;">Name</th>
-                            <th style="width: 15%;">Email</th>
-                            <th style="width: 20%;">Job Position</th>
-                            <th style="width: 25%;">Company</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td></td><td></td><td></td><td></td></tr>
-                        <tr><td></td><td></td><td></td><td></td></tr>
-                        <tr><td></td><td></td><td></td><td></td></tr>
-                        <tr><td></td><td></td><td></td><td></td></tr>
-                        <tr><td></td><td></td><td></td><td></td></tr>
-                        <tr><td></td><td></td><td></td><td></td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="button-container" style="text-align: right; width: 100%;">
-				<a href="generateReport.php" class="btn-primary">View Report</a>
-            </div>
-
-        </div>
+<div class="nav-header">
+    <div class="logo-trigger-box" id="logoToggle">
+        <img src="startIT logo.jpg" alt="startIT Menu Logo" class="nav-logo-img">
     </div>
+    
+    <div class="header-title">Admin</div>
+    
+    <div class="header-nav">
+        <a href="PICDetails.html">View PIC details</a>
+        <a href="registerPIC.php">Register PIC</a>
+		<a href="interface.php">Log Out</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="card">
+        
+        <div class="search-container">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search for applicant">
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40%;">Name</th>
+                        <th style="width: 15%;">Email</th>
+                        <th style="width: 20%;">Job Position</th>
+                        <th style="width: 25%;">Company</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td></td><td></td><td></td><td></td></tr>
+                    <tr><td></td><td></td><td></td><td></td></tr>
+                    <tr><td></td><td></td><td></td><td></td></tr>
+                    <tr><td></td><td></td><td></td><td></td></tr>
+                    <tr><td></td><td></td><td></td><td></td></tr>
+                    <tr><td></td><td></td><td></td><td></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="button-container">
+            <button class="btn-report">View Report</button>
+        </div>
+
+    </div>
+</div>
+
 
 </body>
 </html>
