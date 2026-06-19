@@ -1,5 +1,4 @@
 <?php
-// update_status.php
 $servername = "localhost";
 $username   = "root"; 
 $password   = ""; 
@@ -15,7 +14,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = intval($_POST['id']);
     $status = $_POST['status'];
 
-    // Kemaskini status dalam database
     $stmt = $conn->prepare("UPDATE applications SET status = ? WHERE id = ?");
     $stmt->bind_param("si", $status, $id);
     
@@ -229,7 +227,7 @@ $conn->close();
        
 
 
-        /* --- Action Button Bawah --- */
+        /* --- Action Button --- */
         .button-container {
             display: flex;
             justify-content: flex-end;
@@ -253,7 +251,6 @@ $conn->close();
             background-color: #3d1f85;
         }
 		
-		/* Gaya asas untuk kotak dropdown */
 		.status-select {
 			width: 100%;
 			padding: 8px 12px;
@@ -265,14 +262,12 @@ $conn->close();
 			transition: all 0.2s ease;
 		}
 
-		/* Warna jika status 'Approved' (Hijau) */
 		.status-select.approved {
 			background-color: #d4edda;
 			color: #155724;
 			border-color: #c3e6cb;
 		}
 
-		/* Warna jika status 'Reject' (Merah) */
 		.status-select.rejected {
 			background-color: #f8d7da;
 			color: #721c24;
@@ -388,10 +383,8 @@ $conn->close();
         }
 		
 		function updateStatusStyle(selectElement) {
-			// Buang kelas warna yang lama
 			selectElement.classList.remove('pending', 'approved', 'rejected');
 			
-			// Masukkan kelas warna baharu berdasarkan apa yang dipilih oleh user
 			if (selectElement.value === 'pending') {
 				selectElement.classList.add('pending');
 			} else if (selectElement.value === 'approved') {
@@ -402,7 +395,6 @@ $conn->close();
 		}
 		
 		function updateStatusStyle(selectElement) {
-        // 1. Tukar warna visual dropdown
         selectElement.classList.remove('approved', 'rejected');
         if (selectElement.value === 'approved') {
             selectElement.classList.add('approved');
@@ -410,7 +402,6 @@ $conn->close();
             selectElement.classList.add('rejected');
         }
 
-        // 2. Hantar data ke Backend PHP menggunakan AJAX (Fetch API)
         const applicantId = selectElement.getAttribute('data-id');
         const newStatus = selectElement.value;
 
@@ -424,7 +415,6 @@ $conn->close();
         .then(response => response.text())
         .then(data => {
             console.log("Respon Database:", data);
-            // Anda boleh tambah notifikasi "Status Berjaya Dikemas kini" di sini jika mahu
         })
         .catch(error => console.error('Ralat:', error));
        }
