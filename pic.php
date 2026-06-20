@@ -45,11 +45,6 @@ if ($conn->connect_error) {
             flex-direction: column;
             position: relative;
             overflow: hidden;
-            transition: width 0.3s ease;
-        }
-
-        .left-col.full-width {
-            width: 100%;
         }
 
         .header-logo { 
@@ -106,19 +101,9 @@ if ($conn->connect_error) {
             width: 50%;
             background-color: #B4A4EB; 
             padding: 40px 60px;
-            display: none; 
+            display: flex; 
             flex-direction: column;
             align-items: flex-end;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        .right-col.show-history {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
         }
 
         .top-nav {
@@ -174,8 +159,10 @@ if ($conn->connect_error) {
         .job-card {
             background-color: #FFFDF9;
             border-radius: 12px;
-            padding: 20px; 
+            padding: 20px 25px; 
             display: flex;
+            justify-content: space-between;
+            align-items: stretch;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             position: relative;
             transition: transform 0.2s;
@@ -186,8 +173,9 @@ if ($conn->connect_error) {
             transform: scale(1.02);
         }
 
-        .job-card:nth-child(even) { margin-left: -20px; }
-        .job-card:nth-child(odd):not(.section-title) { margin-left: 20px; }
+        .job-card:nth-child(even), .job-card:nth-child(odd) { 
+            margin-left: 0; 
+        }
 
         .card-details {
             display: flex;
@@ -210,22 +198,23 @@ if ($conn->connect_error) {
         }
 
         .card-details h3 {
-            font-size: 1.2rem;
-            color: #444;
+            font-size: 1.3rem;
+            color: #222;
+            font-weight: bold;
+            margin-top: 2px;
         }
 
         .location {
-            color: #888;
+            color: #666;
             font-size: 0.9rem;
         }
 
         .card-meta {
-            margin-left: auto;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: flex-end;
-            padding-bottom: 4px;
+            text-align: right;
         }
 
         .edit-link {
@@ -247,7 +236,6 @@ if ($conn->connect_error) {
         @media (max-width: 900px) {
             .dashboard-container { flex-direction: column; }
             .left-col, .right-col { width: 100%; padding: 30px; }
-            .job-card:nth-child(even), .job-card:nth-child(odd) { margin-left: 0; }
         }
     </style>
 </head>
@@ -255,7 +243,7 @@ if ($conn->connect_error) {
 
     <div class="dashboard-container">
         
-        <div class="left-col full-width" id="leftColumn">
+        <div class="left-col" id="leftColumn">
             <div class="header-logo">
                 <img src="startIt logo.jpg" alt="Logo">
                 <span class="logo-text">Person In Charge</span>
@@ -266,8 +254,6 @@ if ($conn->connect_error) {
                 <p class="subtitle">
                     Start IT is the platform to all company posted and review the applicant in IT field easily.
                 </p>
-                <br>
-                <button type="button" class="btn btn-primary" id="initPostBtn" onclick="toggleHistoryView()" style="align-self: flex-start; margin-top: 15px;">JOB POST</button>
             </div>
             
             <div class="building-bg"></div>
@@ -284,23 +270,27 @@ if ($conn->connect_error) {
                 <h2 class="section-title">History Post</h2>
 
                 <?php
-                $query = "SELECT * FROM jobs ORDER BY created_at DESC"; 
+                $query = "SELECT * FROM job_posting ORDER BY job_id DESC"; 
                 $result = $conn->query($query); 
 
                 if ($result && $result->num_rows > 0) {
                     while($row = $result->fetch_assoc()) { 
                         
-                        $time_posted = strtotime($row['created_at']);
-                        $time_diff = time() - $time_posted;
-                        
-                        if ($time_diff < 60) {
-                            $time_display = "Just now";
-                        } elseif ($time_diff < 3600) {
-                            $time_display = round($time_diff / 60) . " min ago";
-                        } elseif ($time_diff < 86400) {
-                            $time_display = round($time_diff / 3600) . " hour ago";
-                        } else {
-                            $time_display = round($time_diff / 86400) . " day ago";
+                        // TEPAT: Menggunakan nama column 'posted_date' untuk format masa
+                        $time_display = "";
+                        if (!empty($row['posted_date'])) {
+                            $time_posted = strtotime($row['posted_date']);
+                            $time_diff = time() - $time_posted;
+                            
+                            if ($time_diff < 60) {
+                                $time_display = "Just now";
+                            } elseif ($time_diff < 3600) {
+                                $time_display = round($time_diff / 60) . " min ago";
+                            } elseif ($time_diff < 86400) {
+                                $time_display = round($time_diff / 3600) . " hour ago";
+                            } else {
+                                $time_display = round($time_diff / 86400) . " day ago";
+                            }
                         }
                         ?>
                         
@@ -308,10 +298,11 @@ if ($conn->connect_error) {
                             <div class="card-details">
                                 <span class="badge badge-orange"><?php echo htmlspecialchars($row['job_position']); ?></span>
                                 <h3><?php echo htmlspecialchars($row['company_name']); ?></h3>
-                                <p class="location"><?php echo htmlspecialchars($row['location']); ?></p>
+                                <p class="location"><?php echo htmlspecialchars($row['job_location']); ?></p>
                             </div>
+                            
                             <div class="card-meta">
-                                <a href="editJob.php?id=<?php echo $row['id']; ?>" class="edit-link">Edit</a>
+                                <a href="editJob.php?id=<?php echo $row['job_id']; ?>" class="edit-link">Edit</a>
                                 <span class="time-stamp"><?php echo $time_display; ?></span>
                             </div>
                         </div>
@@ -329,18 +320,6 @@ if ($conn->connect_error) {
         </div>
 
     </div>
-
-    <script>
-        function toggleHistoryView() {
-            const leftCol = document.getElementById('leftColumn');
-            const rightCol = document.getElementById('rightColumn');
-            const initBtn = document.getElementById('initPostBtn');
-
-            leftCol.classList.remove('full-width');
-            rightCol.classList.add('show-history');
-            initBtn.style.display = 'none';
-        }
-    </script>
 
 </body>
 </html>
