@@ -1,15 +1,10 @@
-<?php session_start(); 
-if (!isset($_SESSION['username'])) {
-    header("Location: LogIn.php");
-    exit();
-}
-?>
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>startIT - Log in</title>
+    <title>Log in</title>
     <style>
         body {
             background-color: #b5a6f2; 
@@ -31,21 +26,6 @@ if (!isset($_SESSION['username'])) {
             padding: 0 40px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
             box-sizing: border-box;
-        }
-		
-        .logo-trigger-box {
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 6px;
-            border-radius: 8px;
-            transition: background-color 0.2s, transform 0.1s;
-        }
-
-        .logo-trigger-box:hover {
-            background-color: rgba(255, 255, 255, 0.15);
-            transform: scale(1.03);
         }
 		
         .nav-logo-img {
@@ -169,23 +149,24 @@ if (!isset($_SESSION['username'])) {
             box-sizing: border-box;
         }
 
-        .btn-container {
-            width: 100%;
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 5px;
-        }
+       .btn-container {
+		width: 100%;
+		display: flex;
+		justify-content: flex-end;
+		margin-top: 5px;
+		gap: 15px; /* Adds space separating the Submit and Back buttons */
+	}
 
+        /* ===== FIXED: Matches Back Button exactly in styling, borders, and size ===== */
         .btn-submit {
-            background-color: #51257d;
-            color: white;
-            font-size: 18px;
+            background-color: #4A154B;
+            color: #FFFFFF;
+            border: none;
+            padding: 12px 40px;
+            font-size: 1rem;
             font-weight: bold;
-            padding: 10px 35px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             transition: opacity 0.2s;
         }
 
@@ -197,9 +178,7 @@ if (!isset($_SESSION['username'])) {
 <body>
 
     <div class="nav-header">
-        <div class="logo-trigger-box" id="logoToggle">
-            <img src="startIT logo.jpg" alt="startIT Menu Logo" class="nav-logo-img">
-        </div>
+        <img src="startIT logo.jpg" alt="startIT Menu Logo" class="nav-logo-img">
         <a href="aboutUs.php" class="nav-right-link">About Us</a> 
     </div>
 
@@ -207,7 +186,7 @@ if (!isset($_SESSION['username'])) {
         <form action="authenticate.php" method="POST" class="login-wrapper">
             
             <div class="brand-logo-container2">
-                <img src="startIT image.png" alt="startIT Logo">
+                <img src="startIT.png" alt="startIT Logo">
             </div>
             
             <div class="login-box">
@@ -240,27 +219,13 @@ if (!isset($_SESSION['username'])) {
                 </div>
             </div>
 
-            <div class="btn-container">
-                <button type="submit" class="btn-submit">Submit</button>
-            </div>
+           <div class="btn-container">
+				<button type="submit" class="btn-submit">Submit</button>
+				<button type="button" class="btn-submit" onclick="window.location.href='interface.php'">Back</button>
+			</div>
             
         </form>
     </div>
 
-<script>
-        const logoToggle = document.getElementById('logoToggle');
-        const panelSidebar = document.getElementById('panelSidebar');
-
-        logoToggle.addEventListener('click', function(event) {
-            event.stopPropagation();
-            panelSidebar.classList.toggle('active');
-        });
-
-        document.addEventListener('click', function(event) {
-            if (!panelSidebar.contains(event.target) && !logoToggle.contains(event.target)) {
-                panelSidebar.classList.remove('active');
-            }
-        });
-</script>
 </body>
 </html>
