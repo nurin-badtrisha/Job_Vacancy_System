@@ -1,3 +1,49 @@
+<?php
+// 1. Always include the connection file first so variables are available
+include ("dbconn.php");
+
+// 2. Enable error reporting to send text alerts cleanly instead of breaking JSON
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Kept at 0 for AJAX security, errors captured manually below
+
+// 3. Handle AJAX Deletion Requests
+if (isset($_POST['action']) && $_POST['action'] == 'delete' && isset($_POST['id'])) {
+    if (ob_get_length()) ob_clean();
+    header('Content-Type: application/json');
+    
+    $company_id = intval($_POST['id']);
+    
+    // CHANGED: Fixed to use $dbconn matching your main script configuration
+    if (!isset($dbconn) || $dbconn->connect_error) {
+        echo json_encode(["status" => "error", "message" => "Database link missing or failed."]);
+        exit;
+    }
+    
+    $delete_sql = "DELETE FROM company WHERE company_id = ?";
+    $stmt = $dbconn->prepare($delete_sql);
+    
+    if ($stmt) {
+        $stmt->bind_param("i", $company_id);
+        if ($stmt->execute()) {
+            echo json_encode(["status" => "success", "message" => "Record deleted successfully."]);
+        } else {
+            // Check if failure is due to foreign key restrictions in other tables
+            echo json_encode(["status" => "error", "message" => "Execution failed: " . $stmt->error]);
+        }
+        $stmt->close();
+    } else {
+        echo json_encode(["status" => "error", "message" => "Preparation failed: " . $dbconn->error]);
+    }
+    
+    $dbconn->close();
+    exit; 
+}
+
+// 4. Fetch all current data from the 'company' table
+$sql = "SELECT * FROM company";
+$result = $dbconn->query($sql);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +59,7 @@
         }
 
         body {
-            background-color: #b4bcf4; 
+            background-color: #b4a7d6; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
             display: flex;
@@ -69,56 +115,22 @@
             flex: 1;
         }
         
-        /* Floating Sidebar Menu Styling */
-        .sidebar-menu {
-            position: absolute;
-            top: 70px;
-            left: -260px;
-            width: 240px;
-            background-color: #4A154B;
-            box-shadow: 4px 8px 25px rgba(0, 0, 0, 0.3);
-            border-bottom-right-radius: 12px;
-            padding: 20px 0;
-            display: flex;
-            flex-direction: column;
-            transition: left 0.3s ease;
-            z-index: 5;
-        }
-
-        .sidebar-menu.active {
-            left: 0;
-        }
-
-        .sidebar-menu a {
-            color: #FFFFFF;
-            padding: 16px 25px;
+      .header-nav a {
+            color: white;
             text-decoration: none;
-            font-size: 1.1rem;
+            margin-left: 20px;
+            font-size: 14px;
             font-weight: 500;
-            border-left: 4px solid transparent;
-            transition: background 0.2s, border-left 0.2s;
         }
 
-        .sidebar-menu a:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .sidebar-menu a.active-view {
-            background-color: rgba(255, 255, 255, 0.15);
-            border-left: 4px solid #B4A4EB;
-            font-weight: bold;
-        }
-
-        .sidebar-divider {
-            height: 1px;
-            background-color: rgba(255, 255, 255, 0.15);
-            margin: 10px 25px;
+        .header-nav a:hover {
+            text-decoration: underline;
         }
         
         /* --- Main Content Card --- */
         .container {
-            width: 90%;
-            max-width: 1000px;
+            width: 95%;
+            max-width: 1100px;
             margin: auto;
             padding-top: 20px;
             padding-bottom: 20px;
@@ -178,7 +190,7 @@
             background-color: #b3a2f2; 
             color: #000000;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 17px;
             padding: 14px;
             text-align: left;
             border-bottom: 1px solid #9c8be0;
@@ -189,10 +201,10 @@
         }
 
         td {
-            padding: 18px;
+            padding: 14px;
             height: 55px; 
             border-bottom: 1px solid #cbc2f7;
-            font-size: 15px;
+            font-size: 14px;
             color: #333;
             outline: none;
             transition: background-color 0.2s;
@@ -202,12 +214,22 @@
             border-bottom: none;
         }
 
+        /* --- Visual Style When Row Is Edited --- */
         tr.editing-row td.editable-cell {
-            background-color: #ffffff;
+            background-color: #ffffff; 
             box-shadow: inset 0 0 3px rgba(79, 15, 105, 0.4);
             color: #000;
         }
 
+        /* --- Action Controls Layout --- */
+        .action-cell-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* --- Inline Action Buttons --- */
         .btn-action-edit {
             color: #4f0f69;
             text-decoration: none;
@@ -215,66 +237,103 @@
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            gap: 6px;
+            gap: 4px;
         }
-        /* --- Button Edit --- */
+
         .btn-action-edit:hover {
             color: #3d1f85;
             text-decoration: underline;
         }
+
         .btn-action-edit.saving {
-            color: #2e7d32; /* Warna hijau */
+            color: #2e7d32; 
         }
 
-        .button-container {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 5px;
-            gap: 15px;
-        }
-
-        .btn-report {
-            background-color: #512da8;
-            color: white;
-            border: none;
-            padding: 12px 28px;
-            font-size: 16px;
+        .btn-action-remove {
+            color: #c62828;
+            text-decoration: none;
             font-weight: bold;
-            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        .btn-report:hover {
-            background-color: #3d1f85;
+        .btn-action-remove:hover {
+            color: #b71c1c;
+            text-decoration: underline;
         }
+
+        /* --- Action Button --- */
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px; 
+            background-color: #3b145a;
+            color: white !important;
+            padding: 10px 20px; 
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background-color: #3b145a;
+            transform: translateY(-1px); 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15); 
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px); 
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+         /* --- Header Section --- */
+        header {
+            background-color: #4f0f69; 
+            color: white;
+            width: 100%;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
     </style>
 </head>
 <body>
 
-<div class="nav-header">
-    <div class="logo-trigger-box" id="logoToggle">
-        <img src="startIT logo.jpg" alt="startIT Menu Logo" class="nav-logo-img">
-    </div>
-    <div class="header-title">PIC Details</div>
-    <div class="header-spacer"></div>
-</div>
 
-<div class="sidebar-menu" id="panelSidebar">
-    <a href="UpdateProfile.php" class="active-view">Update Profile</a>
-    <a href="job_vacancy.php">Job Vacancy</a>
-    <a href="applicationStatus.php">Application Status</a>
-    <div class="sidebar-divider"></div>
-    <a href="logout.php" style="color: #FF8A8A; font-size: 0.95rem;">Log Out</a>
-</div>
+<header>
+        <div class="header-left">
+          <img src="startIT logo.jpg" alt="startIT Menu Logo" class="nav-logo-img">
+        </div>
+        <div class="header-title">PIC Details</div>
+        <nav class="header-nav">
+            <a href="adminReport.php" class="active-view">Admin Dashboard</a>
+            <a href="PICdetails.php" class="active-view">PIC Details</a>
+            <a href="registerPIC.php" class="active-view">Register PIC</a>
+            <a href="interface.php" class="active-view">Log Out</a>
+        </nav>
+    </header>
 
 <div class="container">
     <div class="card">
         
         <div class="search-container">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder="Search for applicant">
+            <input type="text" id="searchInput" placeholder="Search for company">
         </div>
 
         <div class="table-wrapper">
@@ -285,67 +344,112 @@
                         <th style="width: 20%;">Company Email</th>
                         <th style="width: 20%;">Company Phone Number</th>
                         <th style="width: 20%;">Company Address</th>
-                        <th style="width: 15%; text-align: center;">Edit</th>
+                        <th style="width: 15%; text-align: center;">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td class="editable-cell"></td>
-                        <td class="editable-cell"></td>
-                        <td class="editable-cell"></td>
-                        <td class="editable-cell"></td>
+                <tbody id="companyTableBody">
+                    <?php
+                    if ($result && $result->num_rows > 0) {
+                        while($row = $result->fetch_assoc()) {
+                    ?>
+                    <tr class="company-row" data-id="<?php echo $row['company_id']; ?>">
+                        <td class="editable-cell"><?php echo htmlspecialchars($row['company_name']); ?></td>
+                        <td class="editable-cell"><?php echo htmlspecialchars($row['company_email']); ?></td>
+                        <td class="editable-cell"><?php echo htmlspecialchars($row['contact_number']); ?></td>
+                        <td class="editable-cell">
+                            <?php 
+                            echo htmlspecialchars($row['company_address'] . ", " . $row['company_state'] . " " . $row['company_city']); 
+                            ?>
+                        </td>
                         <td style="text-align: center;">
+                        <div class="action-cell-container">
                             <span class="btn-action-edit" onclick="handleRowEdit(this)">
                                 <i class="fa-solid fa-pen-to-square"></i> Edit
                             </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="editable-cell"></td>
-                        <td class="editable-cell"></td>
-                        <td class="editable-cell"></td>
-                        <td class="editable-cell"></td>
-                        <td style="text-align: center;">
-                            <span class="btn-action-edit" onclick="handleRowEdit(this)">
-                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                            <span class="btn-action-remove" onclick="handleRowDelete(this)">
+                                <i class="fa-solid fa-trash-can"></i> Remove
                             </span>
+                        </div>
                         </td>
                     </tr>
-                   
+                   <?php
+                        }
+                    } else {
+                        echo "<tr class='no-data-fallback'><td colspan='5' style='text-align:center;'>No data found.</td></tr>";
+                    }
+                    if (isset($dbconn)) $dbconn->close();
+                    ?>
                 </tbody>
             </table>
         </div>
 
-        <div class="button-container">
-            <button class="btn-report" onclick="window.location.href='adminReport.php'">Back</button>
+        <div class="button-container" style="text-align: right; width: 100%;">
+            <button class="btn-primary" onclick="window.location.href='adminReport.php'">Back</button>
         </div>
 
     </div>
 </div>
 
 <script>
-    
+    // Dynamic Filter Script Logic
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const filterValue = this.value.toLowerCase().trim();
+        const tableBody = document.getElementById('companyTableBody');
+        const rows = tableBody.getElementsByClassName('company-row');
+        
+        let visibleRowsCount = 0;
+        
+        // Remove existing custom "No matching records found" rows if any exist
+        const customFallback = tableBody.querySelector('.custom-no-match-row');
+        if (customFallback) customFallback.remove();
+        
+        // Hide standard fallback row if we are searching
+        const basicFallback = tableBody.querySelector('.no-data-fallback');
+        if (basicFallback) basicFallback.style.display = 'none';
+
+        for (let i = 0; i < rows.length; i++) {
+            // Evaluates search criteria matches across Name, Email, Phone, and Address columns
+            const nameCell = rows[i].cells[0].textContent.toLowerCase();
+            const emailCell = rows[i].cells[1].textContent.toLowerCase();
+            const phoneCell = rows[i].cells[2].textContent.toLowerCase();
+            const addressCell = rows[i].cells[3].textContent.toLowerCase();
+            
+            if (nameCell.includes(filterValue) || 
+                emailCell.includes(filterValue) || 
+                phoneCell.includes(filterValue) || 
+                addressCell.includes(filterValue)) {
+                
+                rows[i].style.display = ""; // Display matched row
+                visibleRowsCount++;
+            } else {
+                rows[i].style.display = "none"; // Hide non-matching row
+            }
+        }
+        
+        // If all records are filtered out, present a visual "No matching data found" alert message row
+        if (visibleRowsCount === 0 && rows.length > 0) {
+            const noMatchRow = document.createElement('tr');
+            noMatchRow.className = 'custom-no-match-row';
+            noMatchRow.innerHTML = `<td colspan="5" style="text-align: center; color: #666;">No matching records found for "${this.value}"</td>`;
+            tableBody.appendChild(noMatchRow);
+        }
+    });
+
     function handleRowEdit(buttonElement) {
-       
         const row = buttonElement.closest('tr');
-      
         const cells = row.querySelectorAll('.editable-cell');
-      
         const isEditing = row.classList.contains('editing-row');
 
         if (!isEditing) {
-       
             row.classList.add('editing-row');
             cells.forEach(cell => {
                 cell.setAttribute('contenteditable', 'true');
             });
-     
             cells[0].focus();
 
             buttonElement.innerHTML = '<i class="fa-solid fa-circle-check"></i> Save';
             buttonElement.classList.add('saving');
         } else {
-       
             row.classList.remove('editing-row');
             cells.forEach(cell => {
                 cell.setAttribute('contenteditable', 'false');
@@ -354,23 +458,64 @@
             buttonElement.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Edit';
             buttonElement.classList.remove('saving');
 
-            alert("Changes saved successfully!");
+            alert("Changes to this row have been successfully saved!");
+        }
+    }
+    
+    function handleRowDelete(buttonElement) {
+        const row = buttonElement.closest('tr');
+        const companyId = row.getAttribute('data-id');
+        const companyName = row.cells[0].innerText || "this company";
+        
+        if (confirm(`Are you absolutely sure you want to remove all details for "${companyName}"?`)) {
+            const formData = new FormData();
+            formData.append('action', 'delete');
+            formData.append('id', companyId);
+
+            fetch(window.location.pathname, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(textData => {
+                try {
+                    const data = JSON.parse(textData);
+                    if (data.status === 'success') {
+                        row.style.transition = "all 0.4s ease";
+                        row.style.opacity = "0";
+                        setTimeout(() => {
+                            row.remove();
+                        }, 400);
+                    } else {
+                        alert("Database Error:\n" + data.message);
+                    }
+                } catch (jsonError) {
+                    console.error("Raw Response:", textData);
+                    alert("Server Output Parse Error:\n" + textData);
+                }
+            })
+            .catch(error => {
+                console.error("Error executing deletion process:", error);
+                alert("An error occurred: " + error.message);
+            });
         }
     }
 
     const logoToggle = document.getElementById('logoToggle');
     const panelSidebar = document.getElementById('panelSidebar');
 
-    logoToggle.addEventListener('click', function(event) {
-        event.stopPropagation();
-        panelSidebar.classList.toggle('active');
-    });
+    if(logoToggle && panelSidebar) {
+        logoToggle.addEventListener('click', function(event) {
+            event.stopPropagation();
+            panelSidebar.classList.toggle('active');
+        });
 
-    document.addEventListener('click', function(event) {
-        if (!panelSidebar.contains(event.target) && !logoToggle.contains(event.target)) {
-            panelSidebar.classList.remove('active');
-        }
-    });
+        document.addEventListener('click', function(event) {
+            if (!panelSidebar.contains(event.target) && !logoToggle.contains(event.target)) {
+                panelSidebar.classList.remove('active');
+            }
+        });
+    }
 </script>
 
 </body>
