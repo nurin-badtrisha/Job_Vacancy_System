@@ -15,7 +15,7 @@ if ($conn->connect_error) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StartIT - Dashboard</title>
+    <title>PIC Dashboard</title>
     <link rel="stylesheet" href="dashboard-style.css">
     <style>
         * {
@@ -264,6 +264,7 @@ if ($conn->connect_error) {
             <div class="top-nav">
                 <a href="jobPosting.php" class="btn btn-primary">JOB POST</a>
                 <a href="applicantStatus.php" class="btn btn-secondary">APPLICANT</a>
+				<a href="Login.php" class="btn btn-secondary">LOG OUT</a>
             </div>
 
             <div class="feed-section">
@@ -302,7 +303,7 @@ if ($conn->connect_error) {
                             </div>
                             
                             <div class="card-meta">
-                                <a href="editJob.php?id=<?php echo $row['job_id']; ?>" class="edit-link">Edit</a>
+                                
                                 <span class="time-stamp"><?php echo $time_display; ?></span>
                             </div>
                         </div>
