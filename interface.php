@@ -1,9 +1,3 @@
-<?php session_start(); 
-if (!isset($_SESSION['username'])) {
-    header("Location: LogIn.php");
-    exit();
-}
-?>
 <!DOCTYPE html>
 <html lang = "en">
 <head>
@@ -20,16 +14,15 @@ if (!isset($_SESSION['username'])) {
     </div>
 
     <ul>
-        <li><a href="pic.php">PIC</a></li>
-        <li><a href="#">Admin</a></li>
         <li><a href="aboutUs.php">About Us</a></li>
+		<li><a href="contactUs.php">Contact Us</a></li>
     </ul>
 </nav>
 
 
 <br><br><br>
 
-<p style = "text-align: center;"> <img src="startIT image.png" alt="" width = "270" height = "95"></p><br>
+<p style = "text-align: center;"> <img src="startIT.png" alt="" width = "270" height = "95"></p><br>
 
 <font face = "Sans-serif" size = "8">
 <p style = "text-align: center;">Find your <font face = "Sans-serif" size = "8" color = "#5e4b45">Dream
@@ -39,9 +32,10 @@ if (!isset($_SESSION['username'])) {
 
 <div class="buttons">
     <a href="login.php" class="btn">Log In</a>
+    <a href="registerUser.php" class="btn">Register</a>
 </div>
 
-<p style = "text-align: center;"><font face = "Sans-serif" size = "5" color = "black">First time user? <a href="registerUser.php"</a>Register now!</p>
+<p style = "text-align: center;"><font face = "Sans-serif" size = "4" color = "black">First time user? Register now!</p>
 
 <br>
 <br>
@@ -74,8 +68,8 @@ if (!isset($_SESSION['username'])) {
 }
 
 .btn{
-    width:180px;
-    height:65px;
+    width:160px;
+    height:55px;
 
     background:#5a2386;
 
@@ -142,43 +136,7 @@ nav ul li a:hover{
             color: #777;
             font-size: 0.9rem;
         }
-
-@media (max-width: 768px) {
-    /* Tukar card daripada melintang ke menegak */
-    .profile-container {
-        flex-direction: column;
-        align-items: center;
-        padding: 20px;
-        gap: 20px;
-    }
-
-    /* Paksa avatar section duduk tengah */
-    .avatar-section {
-        width: 100%;
-        margin-bottom: 10px;
-    }
-
-    /* Tukar Grid 4 column jadi 1 column menegak ke bawah */
-    .form-section {
-        grid-template-columns: 1fr; 
-        width: 100%;
-        gap: 10px 0px;
-    }
-
-    /* Paksa input address dan butang ambil ruang penuh screen phone */
-    .full-width-row, .button-section, .skills-wrapper {
-        grid-column: span 1;
-    }
-
-    .button-section {
-        justify-content: center; /* Butang update duduk tengah masa kat phone */
-    }
-    
-    /* Hilangkan empty space hantu masa kat phone supaya tak lari alignment */
-    .form-section div:empty {
-        display: none;
-    }
-}
+		
 </style>
 </body>
 </html>
