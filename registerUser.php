@@ -1,9 +1,3 @@
-<?php session_start(); 
-if (!isset($_SESSION['username'])) {
-    header("Location: LogIn.php");
-    exit();
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,7 +59,7 @@ if (!isset($_SESSION['username'])) {
     .form-container {
         background-color: #512b7c;
         width: 85%;
-        max-width: 1000px;
+        max-width: 1100px;
         margin: 0 auto 50px auto;
         padding: 40px;
         border-radius: 30px;
@@ -73,8 +67,69 @@ if (!isset($_SESSION['username'])) {
         color: white;
     }
 
+    /* Outer layout split: profile on left, input grid on right */
+    .form-flex-wrapper {
+        display: flex;
+        gap: 40px;
+        align-items: flex-start;
+    }
+
+    /* Profile Avatar Container Layout */
+    .profile-upload-side {
+        width: 220px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        padding-top: 20px;
+    }
+
+    .avatar-wrapper {
+        width: 170px;
+        height: 170px;
+        background: #dfe2e6;
+        border-radius: 50%;
+        border: 4px solid #b9acf3;
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        transition: transform 0.2s;
+    }
+
+    .avatar-wrapper:hover {
+        transform: scale(1.03);
+    }
+
+    .avatar-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .upload-hint {
+        margin-top: 15px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #e2d5f3;
+        cursor: pointer;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 6px 15px;
+        border-radius: 20px;
+        transition: background 0.2s;
+    }
+
+    .upload-hint:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
     /* MODERN CSS GRID LAYOUT */
     .form-grid {
+        flex-grow: 1;
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 25px 30px;
@@ -131,7 +186,7 @@ if (!isset($_SESSION['username'])) {
         padding-top: 10px;
         font-size: 16px;
         font-weight: 600;
-		gap: 30px;
+        gap: 30px;
     }
 
     .radio-container input[type="radio"] {
@@ -172,6 +227,20 @@ if (!isset($_SESSION['username'])) {
     }
 
     /* Responsive Mobile UI Viewport settings */
+    @media (max-width: 900px) {
+        .form-flex-wrapper {
+            flex-direction: column;
+            align-items: center;
+        }
+        .profile-upload-side {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .form-grid {
+            width: 100%;
+        }
+    }
+
     @media (max-width: 768px) {
         .form-grid {
             grid-template-columns: 1fr;
@@ -197,120 +266,130 @@ if (!isset($_SESSION['username'])) {
     <div class="logo">
         <img src="startIt.png" alt="StartIT Logo">
     </div>
-    <div class="about">About Us</div>
 </div>
 
 <div class="page-title">Register</div>
 
-<form class="form-container" action="registerUserProcess.php" method="POST">
+<form class="form-container" action="registerUserProcess.php" method="POST" enctype="multipart/form-data">
 
-    <div class="form-grid">
+    <div class="form-flex-wrapper">
         
-        <div class="form-group full-width">
-            <label>Full Name:</label>
-            <input type="text" name="fullname" placeholder="Enter your full name" required>
+        <div class="profile-upload-side">
+            <label for="profileImageInput" class="avatar-wrapper">
+                <img id="avatarPreview" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile Preview">
+            </label>
+            <label for="profileImageInput" class="upload-hint">Add Picture</label>
+            <input type="file" id="profileImageInput" name="profile_picture" accept="image/*" style="display: none;">
         </div>
 
-        <div class="form-group">
-            <label>IC Number:</label>
-            <input type="text" name="icnumber" placeholder="e.g. 010203101234" required>
-        </div>
-
-        <div class="form-group">
-            <label>Education Level:</label>
-            <select name="education" required>
-                <option value="">-- Select Education Level --</option>
-                <option value="SPM">SPM</option>
-                <option value="DIPLOMA">DIPLOMA</option>
-                <option value="DEGREE">DEGREE</option>
-                <option value="MASTER">MASTER</option>
-                <option value="PHD">PHD</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Date of Birth:</label>
-            <input type="date" name="dob" required>
-        </div>
-
-        <div class="form-group">
-            <label>Skills:</label>
-            <input type="text" name="skills" placeholder="e.g. PHP, HTML, CSS, Java">
-        </div>
-
-        <div class="form-group">
-            <label>Email Address:</label>
-            <input type="email" name="email" placeholder="name@example.com" required>
-        </div>
-
-        <div class="form-group">
-            <label>Years of Experience:</label>
-            <input type="number" name="experience" min="0" placeholder="e.g. 2">
-        </div>
-
-        <div class="form-group">
-            <label>Phone Number:</label>
-            <input type="text" name="phone" placeholder="e.g. 0123456789" required>
-        </div>
-
-        <div class="form-group">
-            <label>Username:</label>
-            <input type="text" name="username" placeholder="Choose a unique username" required>
-        </div>
-
-        <div class="form-group">
-            <label>Gender:</label>
-            <div class="radio-container">
-                <label><input type="radio" name="gender" value="Female" required> Female</label>
-                <label><input type="radio" name="gender" value="Male"> Male</label>
+        <div class="form-grid">
+            
+            <div class="form-group full-width">
+                <label>Full Name:</label>
+                <input type="text" name="fullname" placeholder="Enter your full name" required>
             </div>
-        </div>
 
-        <div class="form-group">
-            <label>Password:</label>
-            <input type="password" name="password" placeholder="••••••••" required>
-        </div>
+            <div class="form-group">
+                <label>IC Number:</label>
+                <input type="text" name="icnumber" placeholder="e.g. 010203101234" required>
+            </div>
 
-        <div class="form-group full-width">
-            <label>Home Address:</label>
-            <input type="text" name="address" placeholder="Unit, Street name, Neighborhood area" required>
-        </div>
-
-        <div class="form-group three-columns">
-            <div>
-                <label>State:</label>
-                <select name="state" required>
-                    <option value="">-- Select State --</option>
-                    <option value="JOHOR">JOHOR</option>
-                    <option value="KEDAH">KEDAH</option>
-                    <option value="KELANTAN">KELANTAN</option>
-                    <option value="MELAKA">MELAKA</option>
-                    <option value="NEGERI SEMBILAN">NEGERI SEMBILAN</option>
-                    <option value="PAHANG">PAHANG</option>
-                    <option value="PENANG">PENANG</option>
-                    <option value="PERAK">PERAK</option>
-                    <option value="PERLIS">PERLIS</option>
-                    <option value="TERENGGANU">TERENGGANU</option>
-                    <option value="SELANGOR">SELANGOR</option>
-                    <option value="SABAH">SABAH</option>
-                    <option value="SARAWAK">SARAWAK</option>
-                    <option value="KUALA LUMPUR">KUALA LUMPUR</option>
-                    <option value="LABUAN">LABUAN</option>
-                    <option value="PUTRAJAYA">PUTRAJAYA</option>
+            <div class="form-group">
+                <label>Education Level:</label>
+                <select name="education" required>
+                    <option value="">-- Select Education Level --</option>
+                    <option value="SPM">SPM</option>
+                    <option value="DIPLOMA">DIPLOMA</option>
+                    <option value="DEGREE">DEGREE</option>
+                    <option value="MASTER">MASTER</option>
+                    <option value="PHD">PHD</option>
                 </select>
             </div>
-            
-            <div>
-                <label>City:</label>
-                <input type="text" name="city" placeholder="e.g. Cheras" required>
+
+            <div class="form-group">
+                <label>Date of Birth:</label>
+                <input type="date" name="dob" required>
             </div>
 
-            <div>
-                <label>Postcode:</label>
-                <input type="text" name="postcode" placeholder="e.g. 43200" required>
+            <div class="form-group">
+                <label>Skills:</label>
+                <input type="text" name="skills" placeholder="e.g. PHP, HTML, CSS, Java">
             </div>
+
+            <div class="form-group">
+                <label>Email Address:</label>
+                <input type="email" name="email" placeholder="name@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label>Years of Experience:</label>
+                <input type="number" name="experience" min="0" placeholder="e.g. 2">
+            </div>
+
+            <div class="form-group">
+                <label>Phone Number:</label>
+                <input type="text" name="phone" placeholder="e.g. 0123456789" required>
+            </div>
+
+            <div class="form-group">
+                <label>Username:</label>
+                <input type="text" name="username" placeholder="Choose a unique username" required>
+            </div>
+
+            <div class="form-group">
+                <label>Gender:</label>
+                <div class="radio-container">
+                    <label><input type="radio" name="gender" value="Female" required> Female</label>
+                    <label><input type="radio" name="gender" value="Male"> Male</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" name="password" placeholder="••••••••" required>
+            </div>
+
+            <div class="form-group full-width">
+                <label>Home Address:</label>
+                <input type="text" name="address" placeholder="Unit, Street name, Neighborhood area" required>
+            </div>
+
+            <div class="form-group three-columns">
+                <div>
+                    <label>State:</label>
+                    <select name="state" required>
+                        <option value="">-- Select State --</option>
+                        <option value="JOHOR">JOHOR</option>
+                        <option value="KEDAH">KEDAH</option>
+                        <option value="KELANTAN">KELANTAN</option>
+                        <option value="MELAKA">MELAKA</option>
+                        <option value="NEGERI SEMBILAN">NEGERI SEMBILAN</option>
+                        <option value="PAHANG">PAHANG</option>
+                        <option value="PENANG">PENANG</option>
+                        <option value="PERAK">PERAK</option>
+                        <option value="PERLIS">PERLIS</option>
+                        <option value="TERENGGANU">TERENGGANU</option>
+                        <option value="SELANGOR">SELANGOR</option>
+                        <option value="SABAH">SABAH</option>
+                        <option value="SARAWAK">SARAWAK</option>
+                        <option value="KUALA LUMPUR">KUALA LUMPUR</option>
+                        <option value="LABUAN">LABUAN</option>
+                        <option value="PUTRAJAYA">PUTRAJAYA</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label>City:</label>
+                    <input type="text" name="city" placeholder="e.g. Cheras" required>
+                </div>
+
+                <div>
+                    <label>Postcode:</label>
+                    <input type="text" name="postcode" placeholder="e.g. 43200" required>
+                </div>
+            </div>
+            
         </div>
-        
     </div>
 
     <div class="action-container">
@@ -318,6 +397,23 @@ if (!isset($_SESSION['username'])) {
     </div>
 
 </form>
+
+<script>
+// Dynamic file upload reader interface to change preview instantly on screen
+const fileInput = document.getElementById('profileImageInput');
+const avatarPreview = document.getElementById('avatarPreview');
+
+fileInput.addEventListener('change', function() {
+    const chosenFile = this.files[0];
+    if (chosenFile) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            avatarPreview.setAttribute('src', e.target.result);
+        }
+        reader.readAsDataURL(chosenFile);
+    }
+});
+</script>
 
 </body>
 </html>
