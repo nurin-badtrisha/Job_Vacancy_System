@@ -1,7 +1,10 @@
-<?php session_start(); 
+<?php
+// Fix: Start the session at the very top to preserve the 'pic_id' 
+session_start();
+
+// Optional Security Check: If they somehow sneaked into this form without logging in, send them away
 if (!isset($_SESSION['username'])) {
-    header("Location: LogIn.php");
-    exit();
+    die("Error: Access denied. Please log in first.");
 }
 ?>
 <!DOCTYPE html>
@@ -11,7 +14,6 @@ if (!isset($_SESSION['username'])) {
 <title>Job Posting</title>
 
 <style>
-
 *{
     margin:0;
     padding:0;
@@ -30,21 +32,21 @@ body{
 }
 
 /* ===== Top Bar ===== */
-	.top-bar {
-		background-color: #5a2d82;
-		height: 70px;
-		display: flex;
-		align-items: center;
-		padding: 0 20px;
-		color: white;
-		position: relative;
-	}
+.top-bar {
+    background-color: #5a2d82;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    color: white;
+    position: relative;
+}
 
-	.top-title {
-		flex-grow: 1;
-		text-align: center;
-		font-size: 22px;
-	}
+.top-title {
+    flex-grow: 1;
+    text-align: center;
+    font-size: 22px;
+}
 
 /* Upload Box */
 .upload-container{
@@ -140,15 +142,12 @@ body{
 }
 
 @media(max-width:900px){
-
     .form-grid{
         grid-template-columns:1fr;
     }
-
     .title{
         font-size:45px;
     }
-
 }
 
 .form-group.full-width {
@@ -178,47 +177,28 @@ body{
     box-shadow: 6px 6px 0 rgba(0,0,0,0.15);
     display: block;          
 }
-
 </style>
 
-<!-- TOP BAR -->
 <div class="top-bar">
-	<div class="top-title">Job Posting</div>
+    <div class="top-title">Job Posting</div>
 </div>
 
-<!-- Icons -->
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
 
 <div class="main-container">
-    <!-- Form -->
     <form method="POST" action="jobPostingProcess.php" enctype="multipart/form-data">
 
-		 <!-- Upload Image Section -->
-		<div class="upload-container">
-
-        <label for="jobImage" class="upload-box">
-
-            <img id="previewImage"
-            src="https://cdn-icons-png.flaticon.com/512/685/685655.png"
-            alt="Upload Image">
-
-        </label>
-
-        <input type="file"
-        id="jobImage"
-        name="job_image"
-		accept="image/*"
-        hidden>
-
-		</div>
-	
+        <div class="upload-container">
+            <label for="jobImage" class="upload-box">
+                <img id="previewImage" src="https://cdn-icons-png.flaticon.com/512/685/685655.png" alt="Upload Image">
+            </label>
+            <input type="file" id="jobImage" name="job_image" accept="image/*" hidden>
+        </div>
+    
         <div class="form-grid">
-
-			<div class="form-group">
+            <div class="form-group">
                 <label>Job Position:</label>
                 <input type="text" name="job_position" required>
             </div>
@@ -227,11 +207,11 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
                 <label>Company Name:</label>
                 <input type="text" name="company_name" required>
             </div>
-			
-			<div class="form-group">
-				<label>Location:</label>
-				<input type="text" name="job_location" required>
-			</div>
+            
+            <div class="form-group">
+                <label>Location:</label>
+                <input type="text" name="job_location" required>
+            </div>
 
             <div class="form-group">
                 <label>Language Preferences:</label>
@@ -257,54 +237,40 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
                 <label>Salary Range:</label>
                 <input type="text" name="salary_range">
             </div>
-			
-			<div class="form-group full width">
-				<label> Job Description:</label>
-				<textarea placeholder="Enter job description here.." name="job_description" required></textarea>
-			</div>
+            
+            <div class="form-group full-width">
+                <label> Job Description:</label>
+                <textarea placeholder="Enter job description here.." name="job_description" required></textarea>
+            </div>
         </div>
 
         <div class="button-container">
-			 <button type="button" class="back-btn"
-				onclick="window.location.href='PICinterfaces.php'">
-				BACK
-			 </button>
-	
-            <button type="submit" name="submit" class="post-btn">
-				POST!
-			</button>
+            <button type="button" class="back-btn" onclick="window.location.href='pic.php'">
+                BACK
+            </button>
+    
+            <button type="submit" name="submit" class="post-btn" onclick="window.location.href='pic.php'">
+                POST!
+            </button>
         </div>
-
     </form>
-
 </div>
 
 <script>
-
 const imageInput = document.getElementById("jobImage");
 const previewImage = document.getElementById("previewImage");
 
 imageInput.addEventListener("change", function(){
-
     const file = this.files[0];
-
     if(file){
-
         const reader = new FileReader();
-
         reader.onload = function(e){
-
             previewImage.setAttribute("src", e.target.result);
             previewImage.classList.add("preview-active");
-
         }
-
         reader.readAsDataURL(file);
-
     }
-
 });
-
 </script>
 </body>
 </html>
