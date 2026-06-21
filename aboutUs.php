@@ -1,9 +1,3 @@
-<?php session_start(); 
-if (!isset($_SESSION['username'])) {
-    header("Location: LogIn.php");
-    exit();
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,11 +14,12 @@ if (!isset($_SESSION['username'])) {
 
     <ul>
         <li><a href="aboutUs.php">About Us</a></li>
+		 <li><a href="interface.php">Back</a></li>
     </ul>
 </nav>
 
     <div class="about-hero">
-        <p style = "text-align: center;"> <img src="startIT image.png" alt="" width = "270" height = "95"></p><br>
+        <p style = "text-align: center;"> <img src="startIT.png" alt="" width = "270" height = "95"></p><br>
         <div class="headline">
 			Find your <span>Dream</span><br>
 			<span>Job</span> here!
@@ -81,7 +76,7 @@ if (!isset($_SESSION['username'])) {
 
         /* Navigation Bar */
         nav {
-	background-color: #4f0f69;
+	background-color: #4b1a6a;
     height: 70px;
     display: flex;
     align-items: center;
