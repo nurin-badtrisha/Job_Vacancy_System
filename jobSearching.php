@@ -1,11 +1,7 @@
 <?php
-session_start(); 
-if (!isset($_SESSION['username'])) {
-    header("Location: LogIn.php");
-    exit();
-}
 include("dbconn.php");
 
+/* ================= SEARCH & FILTER ================= */
 $search = "";
 $location = "";
 $salary = "";
@@ -34,6 +30,7 @@ if(isset($_GET['search'])){
     }
 }
 
+/* latest post appear first */
 $query .= " ORDER BY posted_date DESC";
 
 $result = mysqli_query($dbconn, $query);
@@ -43,7 +40,7 @@ $result = mysqli_query($dbconn, $query);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Job Vacancy - StartIT</title>
+    <title>Job Vacancy</title>
 
     <style>
         * {
@@ -57,6 +54,7 @@ $result = mysqli_query($dbconn, $query);
             background-color: #b7a9f0;
         }
 		
+		/* ===== Navigation Header ===== */
 		.nav-header {
 			background-color: #4f0f69;
 			width: 100%;
@@ -79,6 +77,7 @@ $result = mysqli_query($dbconn, $query);
 			transform: translateX(-50%);
 		}
 
+		/* ===== Logo Button ===== */
 		.logo-trigger-box {
 			cursor: pointer;
 			display: flex;
@@ -99,6 +98,7 @@ $result = mysqli_query($dbconn, $query);
 			object-fit: contain;
 		}
 
+		/* ===== Sidebar ===== */
 		.sidebar-menu {
 			position: absolute;
 			top: 70px;
@@ -144,6 +144,7 @@ $result = mysqli_query($dbconn, $query);
 			margin: 10px 25px;
 		}
 
+        /* ===== Main ===== */
         .main {
             padding: 60px 20px;
             text-align: center;
@@ -160,6 +161,7 @@ $result = mysqli_query($dbconn, $query);
             font-weight: bold;
         }
 
+        /* ===== Search Box ===== */
         .search-box {
             width: 90%;
             max-width: 900px;
@@ -175,6 +177,7 @@ $result = mysqli_query($dbconn, $query);
             gap: 15px;
             flex-wrap: wrap;
             justify-content: center;
+            align-items: center;
         }
 
         .search-box input,
@@ -185,24 +188,33 @@ $result = mysqli_query($dbconn, $query);
             width: 220px;
         }
 
+        /* ===== UPDATED: Search Button Styles (Matches Dark Purple Back Button) ===== */
         .search-btn {
-            background-color: #5a2d82;
-            color: white;
+            background-color: #4A154B;
+            color: #FFFFFF;
             border: none;
-            padding: 12px 20px;
-            border-radius: 10px;
+            padding: 12px 35px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
             cursor: pointer;
+            transition: opacity 0.2s;
         }
 
         .search-btn:hover {
-            background-color: #6a3fa0;
+            opacity: 0.9;
+            background-color: #4A154B; /* Maintains matching base color background */
         }
 
+        /* ===== Cards Container ===== */
         .cards {
             display: flex;
             justify-content: center;
             gap: 30px;
             flex-wrap: wrap;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .card {
@@ -249,20 +261,23 @@ $result = mysqli_query($dbconn, $query);
             margin-top: 5px;
         }
 
+        /* ===== UPDATED: Apply Job Button Styles (Matches Dark Purple Back Button) ===== */
         .apply-btn {
             width: 100%;
             margin-top: 12px;
-            padding: 10px;
+            background-color: #4A154B;
+            color: #FFFFFF;
             border: none;
-            border-radius: 10px;
-            background-color: #5a2d82;
-            color: white;
-            font-size: 14px;
+            padding: 12px 40px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
             cursor: pointer;
+            transition: opacity 0.2s;
         }
 
         .apply-btn:hover {
-            background-color: #6a3fa0;
+            opacity: 0.9;
         }
     </style>
 </head>
@@ -280,13 +295,13 @@ $result = mysqli_query($dbconn, $query);
 </div>
 
 <div class="sidebar-menu" id="panelSidebar">
-    <a href="update_profile.php">Update Profile</a>
+    <a href="UpdateProfile.php">Update Profile</a>
     <a href="jobSearching.php" class="active-view">Job Vacancy</a>
     <a href="applicationStatus.php">Application Status</a>
 
     <div class="sidebar-divider"></div>
 
-    <a href="logout.php" style="color:#FF8A8A; font-size:0.95rem;">
+    <a href="Login.php" style="color:#FF8A8A; font-size:0.95rem;">
         Log Out
     </a>
 </div>
@@ -306,19 +321,19 @@ $result = mysqli_query($dbconn, $query);
             <input type="text" 
                    name="search" 
                    placeholder="Search job title"
-                   value="<?php echo $search; ?>">
+                   value="<?php echo htmlspecialchars($search); ?>">
 
             <input type="text" 
                    name="location" 
                    placeholder="Filter by location"
-                   value="<?php echo $location; ?>">
+                   value="<?php echo htmlspecialchars($location); ?>">
 
             <select name="salary">
                 <option value="">Salary Range</option>
-                <option value="1000">RM1000+</option>
-                <option value="2000">RM2000+</option>
-                <option value="3000">RM3000+</option>
-                <option value="4000">RM4000+</option>
+                <option value="1000" <?php if($salary == "1000") echo "selected"; ?>>RM1000+</option>
+                <option value="2000" <?php if($salary == "2000") echo "selected"; ?>>RM2000+</option>
+                <option value="3000" <?php if($salary == "3000") echo "selected"; ?>>RM3000+</option>
+                <option value="4000" <?php if($salary == "4000") echo "selected"; ?>>RM4000+</option>
             </select>
 
             <button type="submit" class="search-btn">
@@ -328,38 +343,40 @@ $result = mysqli_query($dbconn, $query);
         </form>
     </div>
 
+    <div class="cards">
+
         <?php
         if(mysqli_num_rows($result) > 0){
 
             while($row = mysqli_fetch_assoc($result)){
+                $imagePath = !empty($row['job_image']) ? $row['job_image'] : 'https://cdn-icons-png.flaticon.com/512/685/685655.png';
         ?>
 
-		<div class="card">
-			<img src="<?php echo $row['image']; ?>">
+        <div class="card">
+            <img src="<?php echo htmlspecialchars($imagePath); ?>" alt="Job Image">
 
-			<div class="company">
-				<?php echo $row['company_name']; ?>
-			</div>
+            <div class="company">
+                <?php echo htmlspecialchars($row['company_name']); ?>
+            </div>
 
-			<div class="tag">
-				<?php echo $row['job_position']; ?>
-			</div>
+            <div class="tag">
+                <?php echo htmlspecialchars($row['job_position']); ?>
+            </div>
 
-			<div class="details">
-				📍 <?php echo $row['location']; ?>
-			</div>
+            <div class="details">
+                📍 <?php echo htmlspecialchars($row['job_location']); ?>
+            </div>
 
-			<div class="details">
-				💰 RM <?php echo $row['salary']; ?>
-			</div>
+            <div class="details">
+                💰 RM <?php echo htmlspecialchars($row['salary_range']); ?>
+            </div>
 
-			<a href="applyJob.php?id=<?php echo $row['id']; ?>">
-				<button class="apply-btn">
-					Apply Job
-				</button>
-			</a>
-
-		</div>
+            <a href="applyJob.php?id=<?php echo urlencode($row['job_id']); ?>">
+                <button class="apply-btn">
+                    Apply Job
+                </button>
+            </a>
+        </div>
 
         <?php
             }
@@ -368,10 +385,9 @@ $result = mysqli_query($dbconn, $query);
         }
         ?>
 
-</div>
+    </div> </div>
 
 <script>
-
 const logoToggle = document.getElementById('logoToggle');
 const panelSidebar = document.getElementById('panelSidebar');
 
@@ -387,7 +403,6 @@ document.addEventListener('click', function(event) {
         panelSidebar.classList.remove('active');
     }
 });
-
 </script>
 
 </body>
