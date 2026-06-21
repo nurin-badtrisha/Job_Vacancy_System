@@ -1,15 +1,51 @@
-<?php session_start(); 
+<?php
+session_start();
+include("dbconn.php");
+
+// 1. Redirect to login if no applicant session exists
 if (!isset($_SESSION['username'])) {
-    header("Location: LogIn.php");
-    exit();
+    die("Error: Please log in as an applicant first to view your application progress.");
 }
-require_once 'status.php'; ?>
+
+$username = $_SESSION['username'];
+
+// 2. Resolve the numeric applicant_id based on the active username session
+$id_query = "SELECT applicant_id FROM applicant WHERE username = '$username'";
+$id_result = mysqli_query($dbconn, $id_query);
+
+if ($user_row = mysqli_fetch_assoc($id_result)) {
+    $applicant_id = $user_row['applicant_id'];
+} else {
+    die("Error: Applicant account not found in the database registry.");
+}
+
+// 3. Fetch applications linked to this user, pulling the job position and company name
+$sql = "SELECT aj.applicant_status AS status, jp.job_position, jp.company_name 
+        FROM apply_job aj
+        JOIN job_posting jp ON aj.job_id = jp.job_id
+        WHERE aj.applicant_id = '$applicant_id'
+        ORDER BY aj.applied_date DESC";
+
+$query_result = mysqli_query($dbconn, $sql);
+
+$applications = [];
+if ($query_result) {
+    while ($row = mysqli_fetch_assoc($query_result)) {
+        // Build the structure expected by your loop down below
+        $applications[] = [
+            'job_title' => $row['job_position'],
+            'company'   => $row['company_name'],
+            'status'    => $row['status']
+        ];
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StartIT</title>
+    <title>Application Status</title>
 </head>
 <body>
 
@@ -18,14 +54,15 @@ require_once 'status.php'; ?>
             <img src="startIT logo.jpg" alt="startIT Menu Logo" class="nav-logo-img">
         </div>
         <div class="header-title">Application Status</div>
-        <div></div> </div>
+        <div></div> 
+    </div>
 
     <div class="sidebar-menu" id="panelSidebar">
-        <a href="update_profile.php">Update Profile</a>
-        <a href="job_vacancy.php">Job Vacancy</a>
+        <a href="UpdateProfile.php">Update Profile</a>
+        <a href="jobSearching.php">Job Vacancy</a>
         <a href="applicationStatus.php" class="active-view">Application Status</a>
         <div class="sidebar-divider"></div>
-        <a href="logout.php" style="color: #FF8A8A; font-size: 0.95rem;">Log Out</a>
+        <a href="Login.php" style="color: #FF8A8A; font-size: 0.95rem;">Log Out</a>
     </div>
 
     <div class="laptop-mockup-frame">
@@ -37,30 +74,40 @@ require_once 'status.php'; ?>
                 <?php else: ?>
                     <?php foreach ($applications as $row): 
                         $jobTitle = htmlspecialchars($row['job_title']);
+                        $companyName = htmlspecialchars($row['company']);
                         $statusText = htmlspecialchars($row['status']);
                         
                         // Select styling profile based on status text string data
                         $statusClass = 'status-in-progress';
+                        $isApproved = false;
+
                         if (strtolower($statusText) == 'rejected') {
                             $statusClass = 'status-rejected';
                         } elseif (strtolower($statusText) == 'approve' || strtolower($statusText) == 'approved') {
                             $statusClass = 'status-approve';
+                            $isApproved = true;
                         }
                     ?>
                         <div class="status-box">
-                            <div class="company-name">PETRONAS</div>
+                            <div class="company-name"><?php echo $companyName; ?></div>
                             <span class="badge badge-applied">Applied</span>
                             <div class="job-title"><?php echo $jobTitle; ?></div>
                             <div class="process-text <?php echo $statusClass; ?>">
                                 <?php echo $statusText; ?>
                             </div>
+
+                            <?php if ($isApproved): ?>
+                                <div class="interview-note">
+                                    we will reach you soon via email/whatapps for an interview meeting
+                                </div>
+                            <?php endif; ?>
                         </div>
-                        <?php endforeach; ?>
+                    <?php endforeach; ?>
                 <?php endif; ?>
             </div>
 
             <div class="action-row">
-                <button type="button" onclick="window.location.href='applicant_dashboard.php'" class="back-btn">Back</button>
+                <button type="button" onclick="window.location.href='jobSearching.php'" class="back-btn">Back</button>
             </div>
 
         </div>
@@ -70,13 +117,11 @@ require_once 'status.php'; ?>
         const logoToggle = document.getElementById('logoToggle');
         const panelSidebar = document.getElementById('panelSidebar');
 
-        // Clicking the icon reveals or conceals the vertical sidebar menu
         logoToggle.addEventListener('click', function(event) {
             event.stopPropagation();
             panelSidebar.classList.toggle('active');
         });
 
-        // Hides sidebar instantly if clicking out bounds of the navigation elements
         document.addEventListener('click', function(event) {
             if (!panelSidebar.contains(event.target) && !logoToggle.contains(event.target)) {
                 panelSidebar.classList.remove('active');
@@ -151,7 +196,7 @@ require_once 'status.php'; ?>
         .sidebar-menu {
             position: absolute;
             top: 70px;
-            left: -260px; /* Hidden offscreen initially */
+            left: -260px;
             width: 240px;
             background-color: #4A154B;
             box-shadow: 4px 8px 25px rgba(0, 0, 0, 0.3);
@@ -163,7 +208,6 @@ require_once 'status.php'; ?>
             z-index: 5;
         }
 
-        /* Active flyout reveal utility */
         .sidebar-menu.active {
             left: 0;
         }
@@ -182,7 +226,6 @@ require_once 'status.php'; ?>
             background-color: rgba(255, 255, 255, 0.1);
         }
 
-        /* Active item indicator highlighting current location view */
         .sidebar-menu a.active-view {
             background-color: rgba(255, 255, 255, 0.15);
             border-left: 4px solid #B4A4EB;
@@ -226,6 +269,7 @@ require_once 'status.php'; ?>
             align-items: center;
             gap: 12px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+            justify-content: space-between; /* Keeps card spacing clean */
         }
 
         .company-name {
@@ -261,6 +305,16 @@ require_once 'status.php'; ?>
             letter-spacing: 0.5px;
             margin-top: 5px;
             text-transform: uppercase;
+        }
+
+        /* Styling for the added interview message subtext */
+        .interview-note {
+            font-size: 0.8rem;
+            color: #2a9d8f;
+            font-weight: 500;
+            margin-top: 8px;
+            line-height: 1.4;
+            font-style: italic;
         }
 
         /* Status colors */
