@@ -1,11 +1,13 @@
 <?php
 session_start();
 
+// 1. Security Check
 if (!isset($_SESSION['username'])) {
     header("Location: LogIn.php");
     exit();
 }
 
+// 2. Database Connection
 $host = "localhost";
 $user = "root";
 $pass = "";
@@ -17,6 +19,7 @@ if ($conn->connect_error) {
     die("Database Connection Failed: " . $conn->connect_error);
 }
 
+// 3. Ambil penapis bulan & tahun
 $selected_month = isset($_GET['month']) ? intval($_GET['month']) : intval(date('m'));
 $selected_year  = isset($_GET['year']) ? intval($_GET['year']) : intval(date('Y'));
 
@@ -26,6 +29,7 @@ $months_list = [
     9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
 ];
 
+// 4. Query TEPAT mengikut rajah ERD
 $query = "
     SELECT jp.company_name, COUNT(aj.applicant_id) as total_applicants
     FROM apply_job aj
@@ -64,8 +68,10 @@ if ($max_applicants == 0) { $max_applicants = 10; }
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; }
         
+        /* Background purple cair sebiji macam Canva kau */
         body { background-color: #b4a7d6; padding-bottom: 50px; }
         
+/* ===== Navigation Header ===== */
 		.nav-header {
 			background-color: #4f0f69;
 			width: 100%;
@@ -88,6 +94,7 @@ if ($max_applicants == 0) { $max_applicants = 10; }
 			transform: translateX(-50%);
 		}
 		
+		/* ===== Logo Button ===== */
 		.logo-trigger-box {
 			cursor: pointer;
 			display: flex;
@@ -108,15 +115,17 @@ if ($max_applicants == 0) { $max_applicants = 10; }
 			object-fit: contain;
 		}
 
+        /* Kad putih melengkung di tengah */
         .main-card {
             max-width: 900px;
             margin: 40px auto;
             background-color: #ffffff;
-            border-radius: 30px; 
+            border-radius: 30px; /* Lengkungan besar ikut gambar */
             padding: 35px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.15);
         }
 
+        /* Form Filter */
         .filter-section {
             display: flex;
             justify-content: center;
@@ -131,6 +140,7 @@ if ($max_applicants == 0) { $max_applicants = 10; }
             background-color: #fff8ff;
         }
 
+        /* Graf Box */
         .chart-box {
             border: 1px solid #cccccc;
             border-radius: 8px;
@@ -145,19 +155,20 @@ if ($max_applicants == 0) { $max_applicants = 10; }
             font-size: 14px;
         }
 
+        /* Jadual Ikut Gaya Canva */
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 25px;
         }
         th, td {
-            border: 1px solid #a2a2a2; 
+            border: 1px solid #a2a2a2; /* Garisan border petak biasa */
             padding: 12px;
             text-align: center;
             font-size: 14px;
         }
         th {
-            background-color: #9999ff;
+            background-color: #9999ff; /* Warna ungu biru lembut macam header table kau */
             color: black;
             font-weight: bold;
         }
@@ -165,6 +176,7 @@ if ($max_applicants == 0) { $max_applicants = 10; }
             background-color: #f2f0f7;
         }
 
+        /* Seksyen Butang di Bawah Sebelah Kanan */
         .button-group {
             display: flex;
             justify-content: flex-end;
@@ -172,6 +184,7 @@ if ($max_applicants == 0) { $max_applicants = 10; }
             margin-top: 20px;
         }
 
+        /* Gaya Butang Canva */
         .btn-canva {
             background-color: #4c2874;
             color: white;
@@ -301,7 +314,7 @@ if ($max_applicants == 0) { $max_applicants = 10; }
 
         <div class="button-group">
             <button class="btn-canva" onclick="window.print()">Print</button>
-            <a href="dashboard.php" class="btn-canva">Back</a>
+            <a href="adminReport.php" class="btn-canva">Back</a>
         </div>
 
     </div>
