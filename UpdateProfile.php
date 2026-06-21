@@ -1,7 +1,37 @@
-<?php session_start(); 
-if (!isset($_SESSION['username'])) {
-    header("Location: LogIn.php");
-    exit();
+<?php
+session_start();
+
+/* =======================
+   DATABASE CONNECTION
+======================= */
+$conn = new mysqli("localhost", "root", "", "startit");
+if ($conn->connect_error) {
+    die("DB Error: " . $conn->connect_error);
+}
+
+/* =======================
+   FETCH USER DATA (USERNAME LOOKUP BYPASS)
+======================= */
+// If your system tracks logged-in applicants by username
+if (isset($_SESSION['username'])) {
+    $username = $conn->real_escape_string($_SESSION['username']);
+    $sql = "SELECT * FROM applicant WHERE username = '$username'";
+} else {
+    // Backup fallback if username session isn't available
+    $applicant_id = $conn->real_escape_string($_SESSION['applicant_id'] ?? $_SESSION['user_id'] ?? '');
+    $sql = "SELECT * FROM applicant WHERE applicant_id = '$applicant_id'";
+}
+
+$result = $conn->query($sql);
+
+if ($result && $result->num_rows > 0) {
+    $user = $result->fetch_assoc();
+    
+    // CRUCIAL SYNC: Force save the precise applicant_id into the session 
+    // so updateprofileprocess.php can read it safely without errors.
+    $_SESSION['applicant_id'] = $user['applicant_id']; 
+} else {
+    die("Error: Applicant record details could not be found for your active logged-in session. Please log out and log in again.");
 }
 ?>
 <!DOCTYPE html>
@@ -12,6 +42,8 @@ if (!isset($_SESSION['username'])) {
     <style>
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
@@ -20,10 +52,11 @@ if (!isset($_SESSION['username'])) {
             margin: 0;
             padding: 0;
             display: flex;
-            flex-direction: column; /* Biar nav bar duduk kat atas sekali */
+            flex-direction: column; 
             min-height: 100vh;
         }
 
+        /* ===== Navigation Header (Synced perfectly with Job Vacancy layout) ===== */
         .nav-header {
             background-color: #4f0f69; 
             width: 100%;
@@ -32,7 +65,9 @@ if (!isset($_SESSION['username'])) {
             align-items: center;
             justify-content: space-between;
             padding: 0 40px;
+            position: relative;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            z-index: 10;
         }
 
         /* Logo Interactive Box */
@@ -43,12 +78,11 @@ if (!isset($_SESSION['username'])) {
             justify-content: center;
             padding: 6px;
             border-radius: 8px;
-            transition: background-color 0.2s, transform 0.1s;
+            transition: 0.2s;
         }
 
         .logo-trigger-box:hover {
             background-color: rgba(255, 255, 255, 0.15);
-            transform: scale(1.03);
         }
 
         .nav-logo-img {
@@ -60,17 +94,18 @@ if (!isset($_SESSION['username'])) {
 
         .header-title {
             color: white;
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            letter-spacing: 0.5px;
+            font-size: 1.4rem;
+            font-weight: 500;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
         }
 		
 		/* Floating Sidebar Menu Styling */
         .sidebar-menu {
             position: absolute;
             top: 70px;
-            left: -260px; /* Hidden offscreen initially */
+            left: -260px; 
             width: 240px;
             background-color: #4A154B;
             box-shadow: 4px 8px 25px rgba(0, 0, 0, 0.3);
@@ -79,10 +114,9 @@ if (!isset($_SESSION['username'])) {
             display: flex;
             flex-direction: column;
             transition: left 0.3s ease;
-            z-index: 5;
+            z-index: 20;
         }
 
-        /* Active flyout reveal utility */
         .sidebar-menu.active {
             left: 0;
         }
@@ -91,7 +125,7 @@ if (!isset($_SESSION['username'])) {
             color: #FFFFFF;
             padding: 16px 25px;
             text-decoration: none;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 500;
             border-left: 4px solid transparent;
             transition: background 0.2s, border-left 0.2s;
@@ -101,7 +135,6 @@ if (!isset($_SESSION['username'])) {
             background-color: rgba(255, 255, 255, 0.1);
         }
 
-        /* Active item indicator highlighting current location view */
         .sidebar-menu a.active-view {
             background-color: rgba(255, 255, 255, 0.15);
             border-left: 4px solid #B4A4EB;
@@ -114,7 +147,6 @@ if (!isset($_SESSION['username'])) {
             margin: 10px 25px;
         }
 		
-        /* Container wrapper untuk bagi form duduk tengah skrin bawah nav bar */
         .main-content {
             flex: 1;
             display: flex;
@@ -183,11 +215,10 @@ if (!isset($_SESSION['username'])) {
             color: #ff99bb;
         }
       
-        /* Grid System yang lebih stabil */
         .form-section {
             flex: 1;
             display: grid;
-            grid-template-columns: 120px 1fr 120px 1fr; /* Set size lebar label siap-siap */
+            grid-template-columns: 120px 1fr 120px 1fr; 
             gap: 15px 15px;
             align-items: center;
         }
@@ -214,14 +245,13 @@ if (!isset($_SESSION['username'])) {
             box-sizing: border-box;
         }
 
-        /* Pembetulan khas untuk wrapper div yang bungkus input skills */
-        .skills-wrapper {
-            grid-column: span 1;
-            width: 100%;
+        /* Layout Grid Helpers */
+        .full-width-row {
+            grid-column: span 3; 
         }
 
-        .full-width-row {
-            grid-column: span 3; /* Span 3 baki ruangan grid selepas tolak label */
+        .clear-row {
+            grid-column-start: 1;
         }
 
         .radio-group {
@@ -268,112 +298,93 @@ if (!isset($_SESSION['username'])) {
             background-color: #7b2cb7;
             transform: translateY(-1px);
         }
-
-        .btn-update:active {
-            transform: translateY(1px);
-        }
     </style>
 </head>
 <body>
-
-<?php
-if (isset($_POST['update'])) {
-    echo "<script>alert('Update Successful');</script>";
-}
-?>
 
 <div class="nav-header">
     <div class="logo-trigger-box" id="logoToggle">
         <img src="startIT logo.jpg" alt="startIT Menu Logo" class="nav-logo-img">
     </div>
     <div class="header-title">Update Profile</div>
-    <div></div>
-</div>
+    <div></div> </div>
 
 <div class="sidebar-menu" id="panelSidebar">
-	<a href="UpdateProfile.php" class="active-view">Update Profile</a>
-	<a href="job_vacancy.php">Job Vacancy</a>
+	<a href="updateprofile.php" class="active-view">Update Profile</a>
+	<a href="jobSearching.php">Job Vacancy</a>
 	<a href="applicationStatus.php">Application Status</a>
 	<div class="sidebar-divider"></div>
-	<a href="logout.php" style="color: #FF8A8A; font-size: 0.95rem;">Log Out</a>
+	<a href="login.php" style="color: #FF8A8A; font-size: 0.95rem;">Log Out</a>
 </div>
 	
 <div class="main-content">
-    <form method="POST" enctype="multipart/form-data" style="width: 100%; max-width: 900px;">
+    <form method="POST" action="updateprofileprocess.php" enctype="multipart/form-data" style="width: 100%; max-width: 900px;">
         <div class="profile-container">
             
             <div class="avatar-section">
-				<label for="profile_picture" class="avatar-container" style="display: block; margin-bottom: 15px;">
-				<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile Picture" style="cursor: pointer;">
-				<input type="file" id="profile_picture" name="profile_picture" class="file-input-wrapper"> </label>
-    
-				<label for="profile_picture" class="edit-label">Edit</label>
-			</div>
-			
+                <label for="profile_picture" class="avatar-container" style="display: block; margin-bottom: 15px;">
+                    <?php 
+                        $image_src = (!empty($user['profile_picture'])) ? $user['profile_picture'] : 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+                    ?>
+                    <img id="avatarPreview" src="<?php echo htmlspecialchars($image_src); ?>" alt="Profile Picture" style="cursor: pointer;">
+                    <input type="file" id="profile_picture" name="profile_picture" class="file-input-wrapper" accept="image/*"> 
+                </label>
+                <label for="profile_picture" class="edit-label">Edit</label>
+            </div>
+	
             <div class="form-section">
-                
-                <label for="fullname">Full Name:</label>
-                <input type="text" id="fullname" name="fullname">
-                
-                <label for="education">Education Level:</label>
-                <input type="text" id="education" name="education">
 
-                <label for="ic_number">IC Number:</label>
-                <input type="text" id="ic_number" name="ic_number">
-                
-                <label for="skills">Skills:</label>
-                <div class="skills-wrapper">
-                    <input type="text" id="skills" name="skills" list="skills-list" placeholder="Select or Type">
-                    <datalist id="skills-list">
-                        <option value="HTML / CSS">
-                        <option value="JavaScript">
-                        <option value="Python">
-                        <option value="Java">
-                        <option value="PHP">
-                    </datalist>
-                </div>
+                <label>Full Name:</label>
+                <input type="text" name="full_name" value="<?= htmlspecialchars($user['full_name'] ?? ''); ?>">
 
-                <label for="dob">Date of Birth:</label>
-                <input type="date" id="dob" name="dob" required>
-                
-                <label for="experience">Experience years:</label>
-                <input type="text" id="experience" name="experience">
+                <label>Education Level:</label>
+                <input type="text" name="education_level" value="<?= htmlspecialchars($user['education_level'] ?? ''); ?>">
 
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email">
-                
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username">
+                <label>IC Number:</label>
+                <input type="text" name="icnumber" value="<?= htmlspecialchars($user['icnumber'] ?? ''); ?>">
 
-                <label for="phone">Phone Number:</label>
-                <input type="text" id="phone" name="phone">
-                
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password">
+                <label>Skills:</label>
+                <input type="text" name="skills" value="<?= htmlspecialchars($user['skills'] ?? ''); ?>">
+
+                <label>Date of Birth:</label>
+                <input type="date" name="date_of_birth" value="<?= htmlspecialchars($user['date_of_birth'] ?? ''); ?>">
+
+                <label>Experience years:</label>
+                <input type="text" name="experience_years" value="<?= htmlspecialchars($user['experience_years'] ?? ''); ?>">
+
+                <label>Email:</label>
+                <input type="email" name="email" value="<?= htmlspecialchars($user['email'] ?? ''); ?>">
+
+                <label>Username:</label>
+                <input type="text" name="username" value="<?= htmlspecialchars($user['username'] ?? ''); ?>">
+
+                <label>Phone Number:</label>
+                <input type="text" name="phone_number" value="<?= htmlspecialchars($user['phone_number'] ?? ''); ?>">
+
+                <label>Password:</label>
+                <input type="password" name="password" placeholder="Leave blank if no change">
 
                 <label>Gender:</label>
                 <div class="radio-group">
-                    <label><input type="radio" name="gender" value="Male"> Male</label>
-                    <label><input type="radio" name="gender" value="Female"> Female</label>
-                </div>
-                
-                <div></div><div></div>
-
-                <label for="address">Address:</label>
-                <div class="full-width-row">
-                    <input type="text" id="address" name="address">
+                    <label>
+                        <input type="radio" name="gender" value="Male" <?= (($user['gender'] ?? '') == 'Male') ? 'checked' : ''; ?>> Male
+                    </label>
+                    <label>
+                        <input type="radio" name="gender" value="Female" <?= (($user['gender'] ?? '') == 'Female') ? 'checked' : ''; ?>> Female
+                    </label>
                 </div>
 
-                <label for="state">State:</label>
-                <input type="text" id="state" name="state">
-                
-                <label for="city">City:</label>
-                <input type="text" id="city" name="city">
+                <label class="clear-row">Address:</label>
+                <input type="text" name="address" value="<?= htmlspecialchars($user['address'] ?? ''); ?>" class="full-width-row">
 
-                <label for="postcode">Posscode:</label>
-                <input type="text" id="postcode" name="postcode">
-                
-                <div></div><div></div>
+                <label>State:</label>
+                <input type="text" name="state" value="<?= htmlspecialchars($user['state'] ?? ''); ?>">
+
+                <label>City:</label>
+                <input type="text" name="city" value="<?= htmlspecialchars($user['city'] ?? ''); ?>">
+
+                <label>Postcode:</label>
+                <input type="text" name="postcode" value="<?= htmlspecialchars($user['postcode'] ?? ''); ?>">
 
                 <div class="button-section">
                     <input type="submit" name="update" value="Update" class="btn-update">
@@ -385,21 +396,31 @@ if (isset($_POST['update'])) {
 </div>
 
 <script>
-        const logoToggle = document.getElementById('logoToggle');
-        const panelSidebar = document.getElementById('panelSidebar');
+    const logoToggle = document.getElementById('logoToggle');
+    const panelSidebar = document.getElementById('panelSidebar');
 
-        // Clicking the icon reveals or conceals the vertical sidebar menu
-        logoToggle.addEventListener('click', function(event) {
-            event.stopPropagation();
-            panelSidebar.classList.toggle('active');
-        });
+    logoToggle.addEventListener('click', function(event) {
+        event.stopPropagation();
+        panelSidebar.classList.toggle('active');
+    });
 
-        // Hides sidebar instantly if clicking out bounds of the navigation elements
-        document.addEventListener('click', function(event) {
-            if (!panelSidebar.contains(event.target) && !logoToggle.contains(event.target)) {
-                panelSidebar.classList.remove('active');
+    document.addEventListener('click', function(event) {
+        if (!panelSidebar.contains(event.target) && !logoToggle.contains(event.target)) {
+            panelSidebar.classList.remove('active');
+        }
+    });
+
+    // Handle instant client-side profile preview refresh
+    document.getElementById('profile_picture').addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatarPreview').setAttribute('src', e.target.result);
             }
-        });
+            reader.readAsDataURL(file);
+        }
+    });
 </script>
 
 </body>
