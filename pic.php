@@ -1,13 +1,55 @@
 <?php
+session_start();
 $servername = "localhost";
 $username   = "root"; 
-$password   = "";     
-$dbname = "startit"; 
+$password   = "";      
+$dbname     = "startit"; 
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 if ($conn->connect_error) {
     die("Connection to database failed: " . $conn->connect_error);
+}
+
+// 1. SECURITY CHECK: Verify the PIC is authenticated
+if (!isset($_SESSION['username'])) {
+    header("Location: Login.php");
+    exit();
+}
+
+$session_username = $_SESSION['username'];
+
+// 2. IDENTITY LOOKUP: Fetch the current logged-in PIC's unique pic_id from the database
+$safe_username = $conn->real_escape_string($session_username);
+$pic_query = "SELECT pic_id FROM person_in_charge WHERE username = '$safe_username'";
+$pic_result = $conn->query($pic_query);
+
+if ($pic_result && $pic_result->num_rows > 0) {
+    $pic_row = $pic_result->fetch_assoc();
+    $current_pic_id = $pic_row['pic_id'];
+} else {
+    die("Error: Person In Charge identity could not be verified in the registry.");
+}
+
+/* ==========================================
+   BACKEND ACTION: HANDLE INLINE DELETION REQUESTS
+   ========================================== */
+if (isset($_POST['delete_job_id'])) {
+    $delete_id = intval($_POST['delete_job_id']);
+    
+    // Ensure they can only delete a post if it actually belongs to them
+    $delete_sql = "DELETE FROM job_posting WHERE job_id = ? AND pic_id = ?";
+    $stmt = $conn->prepare($delete_sql);
+    
+    if ($stmt) {
+        $stmt->bind_param("ii", $delete_id, $current_pic_id);
+        if ($stmt->execute()) {
+            echo "<script>alert('Job post removed successfully!'); window.location.href='" . $_SERVER['PHP_SELF'] . "';</script>";
+        } else {
+            echo "<script>alert('Error executing post removal: " . $conn->error . "');</script>";
+        }
+        $stmt->close();
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -48,7 +90,7 @@ if ($conn->connect_error) {
         }
 
         .header-logo { 
-            display: flex;         
+            display: flex;          
             align-items: center;
             gap: 12px;
         }
@@ -173,10 +215,6 @@ if ($conn->connect_error) {
             transform: scale(1.02);
         }
 
-        .job-card:nth-child(even), .job-card:nth-child(odd) { 
-            margin-left: 0; 
-        }
-
         .card-details {
             display: flex;
             flex-direction: column;
@@ -217,25 +255,27 @@ if ($conn->connect_error) {
             text-align: right;
         }
 
-        .edit-link {
-            color: #b0b0b0;
-            font-size: 0.85rem;
-            text-decoration: none;
-        }
-
-        .edit-link:hover {
-            color: #4A154B;
-            text-decoration: underline;
-        }
-
         .time-stamp {
             color: #b0b0b0;
             font-size: 0.85rem;
         }
 
-        @media (max-width: 900px) {
-            .dashboard-container { flex-direction: column; }
-            .left-col, .right-col { width: 100%; padding: 30px; }
+        .btn-card-delete {
+            background: none;
+            border: none;
+            color: #c62828;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            margin-top: 4px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .btn-card-delete:hover {
+            color: #b71c1c;
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -264,20 +304,20 @@ if ($conn->connect_error) {
             <div class="top-nav">
                 <a href="jobPosting.php" class="btn btn-primary">JOB POST</a>
                 <a href="applicantStatus.php" class="btn btn-secondary">APPLICANT</a>
-				<a href="Login.php" class="btn btn-secondary">LOG OUT</a>
+                <a href="Login.php" class="btn btn-secondary">LOG OUT</a>
             </div>
 
             <div class="feed-section">
                 <h2 class="section-title">History Post</h2>
 
                 <?php
-                $query = "SELECT * FROM job_posting ORDER BY job_id DESC"; 
+                // 3. FIXED FILTER QUERY: Isolates history list items matching ONLY the current PIC's tracking index
+                $query = "SELECT * FROM job_posting WHERE pic_id = '$current_pic_id' ORDER BY job_id DESC"; 
                 $result = $conn->query($query); 
 
                 if ($result && $result->num_rows > 0) {
                     while($row = $result->fetch_assoc()) { 
                         
-                        // TEPAT: Menggunakan nama column 'posted_date' untuk format masa
                         $time_display = "";
                         if (!empty($row['posted_date'])) {
                             $time_posted = strtotime($row['posted_date']);
@@ -303,15 +343,19 @@ if ($conn->connect_error) {
                             </div>
                             
                             <div class="card-meta">
-                                
                                 <span class="time-stamp"><?php echo $time_display; ?></span>
+                                
+                                <form method="POST" action="" onsubmit="return confirm('Are you sure you want to delete this job post?');">
+                                    <input type="hidden" name="delete_job_id" value="<?php echo $row['job_id']; ?>">
+                                    <button type="submit" class="btn-card-delete">Delete</button>
+                                </form>
                             </div>
                         </div>
 
                         <?php
                     }
                 } else {
-                    echo "<p style='color: white; font-style: italic;'>No history posts found.</p>";
+                    echo "<p style='color: white; font-style: italic;'>You haven't posted any job vacancies yet.</p>";
                 }
                 $conn->close();
                 ?>
