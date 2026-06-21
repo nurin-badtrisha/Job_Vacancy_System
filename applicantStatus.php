@@ -4,34 +4,56 @@ $username   = "root";
 $password   = ""; 
 $dbname     = "startit";
 
+// Establish Database Connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id = intval($_POST['id']);
+// Process the status update action safely
+$message = "";
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
+    $applicant_id = intval($_POST['applicant_id']);
+    $job_id = intval($_POST['job_id']);
     $status = $_POST['status'];
 
-    $stmt = $conn->prepare("UPDATE applications SET status = ? WHERE id = ?");
-    $stmt->bind_param("si", $status, $id);
+    // Updates using explicit column names matching apply_job
+    $stmt = $conn->prepare("UPDATE apply_job SET applicant_status = ? WHERE applicant_id = ? AND job_id = ?");
+    $stmt->bind_param("sii", $status, $applicant_id, $job_id);
     
     if ($stmt->execute()) {
-        echo "Status updated succesfully!";
+        $message = "<script>alert('Status updated successfully!');</script>";
     } else {
-        echo "Failed to update ";
+        $message = "<script>alert('Failed to update status.');</script>";
     }
     $stmt->close();
 }
-$conn->close();
+
+/* SQL relational JOIN matching your database schema:
+  Fetches explicit columns to preserve your exact visual table columns 
+*/
+$query = "SELECT 
+            aj.applicant_id,
+            aj.job_id,
+            aj.resume_path,
+            aj.applicant_status,
+            a.full_name AS applicant_name,
+            a.email AS applicant_email,
+            a.phone_number AS applicant_phone,
+            j.job_position AS job_position
+          FROM apply_job aj
+          LEFT JOIN applicant a ON aj.applicant_id = a.applicant_id
+          LEFT JOIN job_posting j ON aj.job_id = j.job_id";
+
+$result = $conn->query($query);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StartIT</title>
+    <title>Applicant Status</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -60,8 +82,6 @@ $conn->close();
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
         }
 
-        
-
         .nav-logo-img {
             width: 45px;
             height: 45px;
@@ -76,12 +96,9 @@ $conn->close();
             font-weight: bold;
             text-align: center;
             letter-spacing: 0.5px;
-			
 			position: absolute;
 			left: 50%;
 			transform: translateX(-50%);
-			text-align: center;
-			
 			z-index: 10;
         }
 
@@ -89,56 +106,9 @@ $conn->close();
             flex: 1;
         }
         
-        /* Floating Sidebar Menu Styling */
-        .sidebar-menu {
-            position: absolute;
-            top: 70px;
-            left: -260px;
-            width: 240px;
-            background-color: #4A154B;
-            box-shadow: 4px 8px 25px rgba(0, 0, 0, 0.3);
-            border-bottom-right-radius: 12px;
-            padding: 20px 0;
-            display: flex;
-            flex-direction: column;
-            transition: left 0.3s ease;
-            z-index: 5;
-        }
-
-        .sidebar-menu.active {
-            left: 0;
-        }
-
-        .sidebar-menu a {
-            color: #FFFFFF;
-            padding: 16px 25px;
-            text-decoration: none;
-            font-size: 1.1rem;
-            font-weight: 500;
-            border-left: 4px solid transparent;
-            transition: background 0.2s, border-left 0.2s;
-        }
-
-        .sidebar-menu a:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .sidebar-menu a.active-view {
-            background-color: rgba(255, 255, 255, 0.15);
-            border-left: 4px solid #B4A4EB;
-            font-weight: bold;
-        }
-
-        .sidebar-divider {
-            height: 1px;
-            background-color: rgba(255, 255, 255, 0.15);
-            margin: 10px 25px;
-        }
-        
-        /* --- Main Content Card --- */
         .container {
-            width: 90%;
-            max-width: 1000px;
+            width: 95%;
+            max-width: 1150px;
             margin: auto;
             padding-top: 20px;
             padding-bottom: 20px;
@@ -154,7 +124,6 @@ $conn->close();
             gap: 25px;
         }
 
-        /* --- Search Bar --- */
         .search-container {
             display: flex;
             align-items: center;
@@ -181,13 +150,10 @@ $conn->close();
             color: #333;
         }
 
-        /* --- Data Table --- */
         .table-wrapper {
             border: 1px solid #b3a2f2;
             border-radius: 4px;
             overflow: hidden;
-			
-			
         }
 
         table {
@@ -211,23 +177,26 @@ $conn->close();
         }
 
         td {
-            padding: 18px;
+            padding: 14px;
             height: 55px; 
             border-bottom: 1px solid #cbc2f7;
             font-size: 15px;
             color: #333;
             outline: none;
-            transition: background-color 0.2s;
         }
 
         tr:last-child td {
             border-bottom: none;
         }
 
-       
+        .no-records {
+            text-align: center;
+            font-size: 18px;
+            color: #666;
+            font-style: italic;
+            padding: 30px;
+        }
 
-
-        /* --- Action Button --- */
         .button-container {
             display: flex;
             justify-content: flex-end;
@@ -236,7 +205,7 @@ $conn->close();
         }
 
         .btn-back {
-            background-color: #512da8;
+            background-color: #4A154B;
             color: white;
             border: none;
             padding: 12px 28px;
@@ -248,12 +217,18 @@ $conn->close();
         }
 
         .btn-back:hover {
-            background-color: #3d1f85;
+            background-color: #330e34;
+        }
+
+        .status-action-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 		
 		.status-select {
-			width: 100%;
-			padding: 8px 12px;
+			flex: 1;
+			padding: 8px 8px;
 			font-size: 14px;
 			font-weight: 600;
 			border-radius: 6px;
@@ -261,6 +236,12 @@ $conn->close();
 			cursor: pointer;
 			transition: all 0.2s ease;
 		}
+
+        .status-select.pending {
+            background-color: #fff3cd;
+            color: #856404;
+            border-color: #ffeeba;
+        }
 
 		.status-select.approved {
 			background-color: #d4edda;
@@ -273,70 +254,98 @@ $conn->close();
 			color: #721c24;
 			border-color: #f5c6cb;
 		}
+
+        .btn-update {
+            background-color: #4A154B;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-update:hover {
+            background-color: #330e34;
+        }
     </style>
 </head>
 <body>
 
+<?php if (!empty($message)) echo $message; ?>
+
 <div class="nav-header">
-    
     <img src="startIT logo.jpg" alt="startIT Menu Logo" class="nav-logo-img">
-    
     <div class="header-title">Applicant Status</div>
     <div class="header-spacer"></div>
 </div>
-
-
 
 <div class="container">
     <div class="card">
         
         <div class="search-container">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder="Search for applicant">
+            <input type="text" id="tableSearch" onkeyup="filterTable()" placeholder="Search for applicant details...">
         </div>
 
         <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
-					    <th style="width: 20%;">Applicant name</th>
+                        <th style="width: 22%;">Applicant name</th>
                         <th style="width: 18%;">Job Position</th>
-                        <th style="width: 17%;">Email</th>
-                        <th style="width: 20%;">Phone Number</th>
+                        <th style="width: 18%;">Email</th>
+                        <th style="width: 15%;">Phone Number</th>
                         <th style="width: 10%;">Resume</th>
-						<th style="width: 17%;">Status</th>
+                        <th style="width: 17%;">Status</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="editable-cell"></td>
-                        <td class="editable-cell"></td>
-                        <td class="editable-cell"></td>
-                        <td class="editable-cell"></td>
-						<td class="editable-cell"></td>
-                        <td>
-							<select class="status-select" onchange="updateStatusStyle(this)">
-								<option value="approved">Approved</option>
-								<option value="rejected">Rejected</option>
-							</select>
-						</td>
-                        </td>
-                    </tr>
-                    <tr>
-					    <td class="editable-cell"></td>
-                        <td class="editable-cell"></td>
-                        <td class="editable-cell"></td>
-                        <td class="editable-cell"></td>
-						<td class="editable-cell"></td>
-						<td>
-							<select class="status-select" onchange="updateStatusStyle(this)">
-								<option value="approved">Approved</option>
-								<option value="rejected">Rejected</option>
-							</select>
-						</td>
-                        </td>
-                    </tr>
-                   
+                    <?php
+                    if ($result && $result->num_rows > 0) {
+                        while ($row = $result->fetch_assoc()) {
+                            // Read current status value or force the default to lowercase pending
+                            $current_status = strtolower($row['applicant_status'] ?? 'pending');
+                            if (!in_array($current_status, ['pending', 'approved', 'rejected'])) {
+                                $current_status = 'pending';
+                            }
+                            ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($row['applicant_name'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($row['job_position'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($row['applicant_email'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($row['applicant_phone'] ?? 'N/A'); ?></td>
+                                <td>
+                                    <?php if(!empty($row['resume_path'])): ?>
+                                        <a href="<?php echo htmlspecialchars($row['resume_path']); ?>" target="_blank" style="color: #512da8; font-weight: bold;">View</a>
+                                    <?php else: ?>
+                                        N/A
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <form method="POST" action="">
+                                        <input type="hidden" name="applicant_id" value="<?php echo $row['applicant_id']; ?>">
+                                        <input type="hidden" name="job_id" value="<?php echo $row['job_id']; ?>">
+                                        <div class="status-action-container">
+                                            <select name="status" class="status-select <?php echo $current_status; ?>" onchange="updateStatusStyle(this)">
+                                                <option value="pending" <?php if($current_status == 'pending') echo 'selected'; ?>>Pending</option>
+                                                <option value="approved" <?php if($current_status == 'approved') echo 'selected'; ?>>Approved</option>
+                                                <option value="rejected" <?php if($current_status == 'rejected') echo 'selected'; ?>>Rejected</option>
+                                            </select>
+                                            <button type="submit" name="update_status" class="btn-update">Update</button>
+                                        </div>
+                                    </form>
+                                </td>
+                            </tr>
+                            <?php
+                        }
+                    } else {
+                        echo "<tr><td colspan='6' class='no-records'>No records found</td></tr>";
+                    }
+                    ?>
                 </tbody>
             </table>
         </div>
@@ -349,77 +358,45 @@ $conn->close();
 </div>
 
 <script>
-    
-    function handleRowEdit(buttonElement) {
-       
-        const row = buttonElement.closest('tr');
-      
-        const cells = row.querySelectorAll('.editable-cell');
-      
-        const isEditing = row.classList.contains('editing-row');
-
-        if (!isEditing) {
-       
-            row.classList.add('editing-row');
-            cells.forEach(cell => {
-                cell.setAttribute('contenteditable', 'true');
-            });
-     
-            cells[0].focus();
-
-            buttonElement.innerHTML = '<i class="fa-solid fa-circle-check"></i> Save';
-            buttonElement.classList.add('saving');
-        } else {
-       
-            row.classList.remove('editing-row');
-            cells.forEach(cell => {
-                cell.setAttribute('contenteditable', 'false');
-            });
-
-            buttonElement.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Edit';
-            buttonElement.classList.remove('saving');
-
-            alert("Perubahan pada baris kotak ini telah berjaya disimpan!");
-        }
-		
-		function updateStatusStyle(selectElement) {
-			selectElement.classList.remove('pending', 'approved', 'rejected');
-			
-			if (selectElement.value === 'pending') {
-				selectElement.classList.add('pending');
-			} else if (selectElement.value === 'approved') {
-				selectElement.classList.add('approved');
-			} else if (selectElement.value === 'rejected') {
-				selectElement.classList.add('rejected');
-			}
-		}
-		
-		function updateStatusStyle(selectElement) {
-        selectElement.classList.remove('approved', 'rejected');
-        if (selectElement.value === 'approved') {
+    // Live color feedback adjustments for status dropdown selections
+    function updateStatusStyle(selectElement) {
+        selectElement.classList.remove('pending', 'approved', 'rejected');
+        if (selectElement.value === 'pending') {
+            selectElement.classList.add('pending');
+        } else if (selectElement.value === 'approved') {
             selectElement.classList.add('approved');
         } else if (selectElement.value === 'rejected') {
             selectElement.classList.add('rejected');
         }
+    }
 
-        const applicantId = selectElement.getAttribute('data-id');
-        const newStatus = selectElement.value;
+    // Interactive front-end filter engine
+    function filterTable() {
+        const input = document.getElementById("tableSearch");
+        const filter = input.value.toLowerCase();
+        const table = document.querySelector("table tbody");
+        const rows = table.getElementsByTagName("tr");
 
-        fetch('update_status.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `id=${applicantId}&status=${newStatus}`
-        })
-        .then(response => response.text())
-        .then(data => {
-            console.log("Respon Database:", data);
-        })
-        .catch(error => console.error('Ralat:', error));
-       }
-    });
+        for (let i = 0; i < rows.length; i++) {
+            if(rows[i].querySelector('.no-records')) continue;
+
+            let matchFound = false;
+            const cells = rows[i].getElementsByTagName("td");
+            
+            // Filters down interactive searchable strings: Name, Position, Email and Phone Info
+            for(let j = 0; j < 4; j++) {
+                if (cells[j]) {
+                    const textValue = cells[j].textContent || cells[j].innerText;
+                    if (textValue.toLowerCase().indexOf(filter) > -1) {
+                        matchFound = true;
+                        break;
+                    }
+                }
+            }
+            rows[i].style.display = matchFound ? "" : "none";
+        }
+    }
 </script>
-
 </body>
 </html>
+<?php $conn->close(); ?>
