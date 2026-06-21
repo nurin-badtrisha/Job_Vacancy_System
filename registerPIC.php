@@ -1,9 +1,3 @@
-<?php session_start(); 
-if (!isset($_SESSION['username'])) {
-    header("Location: LogIn.php");
-    exit();
-}
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,7 +13,7 @@ if (!isset($_SESSION['username'])) {
     }
 
     body {
-        background-color: #b9acf3;
+        background-color: #b4a7d6;;
     }
 
     /* ===== Top Bar ===== */
@@ -152,17 +146,69 @@ if (!isset($_SESSION['username'])) {
             padding: 25px;
         }
     }
+	
+	 /* --- Header Section --- */
+        header {
+            background-color: #4f0f69; /* Dark purple header */
+            color: white;
+            width: 100%;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+		
+		  .header-title {
+            flex: 1;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+		
+		 .header-nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+		
+		 .header-nav a:hover {
+            text-decoration: underline;
+        }
+		
+		  .nav-logo-img {
+            width: 45px;
+            height: 45px;
+            display: block;
+            object-fit: contain;
+        }
 </style>
 </head>
 
 <body>
 
-<div class="top-bar">
-    <div class="logo">
-        <img src="startIt.png" alt="StartIT Logo">
-    </div>
-    <div class="about">Admin</div>
-</div>
+<header>
+        <div class="header-left">
+		  <img src="startIT logo.jpg" alt="startIT Menu Logo" class="nav-logo-img">
+        </div>
+        <div class="header-title">Register PIC</div>
+        <nav class="header-nav">
+            <a href="adminReport.php" class="active-view">Admin Dashboard</a>
+            <a href="PICdetails.php" class="active-view">PIC Details</a>
+			<a href="registerPIC.php" class="active-view">Register PIC</a>
+			<a href="interface.php" class="active-view">Log Out</a>
+        </nav>
+    </header>
 
 <div class="page-title">Register PIC</div>
 
