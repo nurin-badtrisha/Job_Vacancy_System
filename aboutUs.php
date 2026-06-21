@@ -30,14 +30,14 @@
         
         <div class="section">
             <h2>Our Story</h2>
-            <p>Founded in 2026, StartIT was created with a simple mission: to make job searching and recruitment easier, faster, and more organized for everyone. What began as a small project idea has grown into a user-friendly platform that connects job seekers with employers through one centralized system.</p>
-			<p>We believe that finding opportunities should not be complicated. That is why we focus on creating a simple, accessible, and efficient experience where users can browse jobs, apply online, and track their applications with ease.</p>
+            <p>Founded in 2026, StartIT was created with a simple mission; to connect talented IT professionals with meaningful career opportunities in the technology industry. What began as an innovative project has evolved into a centralized platform designed to simplify the recruitment process for both job seekers and employers.</p>
+			<p>At StartIT, we believe that finding the right opportunity should be efficient, accessible and hassle-free. That is why we focus on providing a user-friendly platform where individuals can explore job vacancies, submit applications and track their career progress with ease. By bringing employers and technology talent together in one place, StartIT aims to support career growth and contribute to the development of a stronger digital workforce.</p></p>
 
         </div>
 
         <div class="section">
             <h2>Our Mission</h2>
-            <p>To create a simple and reliable platform that connects job seekers with employment opportunities while helping employers manage recruitment more efficiently. We are committed to building a smooth, organized, and accessible experience for everyone.</p>
+            <p>Our mission is to connect technology professionals with meaningful career opportunities through a simple, reliable and accessible platform. We are committed to creating a seamless recruitment experience that supports career growth, empowers employers and contributes to a stronger technology workforce.</p>
         </div>
 
         <div class="section">
