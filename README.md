@@ -1,5 +1,7 @@
 # Job_Vacancy_System
 Web-based job vacancy management system using PHP and MySQL
+
+
 **User Manual**
 
 This system supports three main user roles: **Admin**, **Person In Charge** and **Applicant**. Below is the detailed functional guide for each user characteristics
@@ -10,8 +12,8 @@ This system supports three main user roles: **Admin**, **Person In Charge** and 
 3. Applicant Manual 
 
 
-**##Admin Manual**
-The Admin manages the administrative credentials and has oversight over system applications.
+**##Admin User Manual**
+The Administrator portal provides complete oversight of applicants, partner company records, and system-wide Person In Charge (PIC) account management.
 
 ###Core function 
 1. **Register Person In Charge:** Create and onboard new PIC accounts into the system.
@@ -36,8 +38,14 @@ The Admin manages the administrative credentials and has oversight over system a
 The PIC manages specific operational functions, job requirement details, and application statuses.
 
 ###Core Function
-1. **Make Job Posting:** Create and publish new job openings to the system
+1. **Make Job Posting:** Create and publish new job openings to the web application
 > 1. PIC can make job posting by click the button "Post Job" in the top bar header of their dashboard. 
+> 2. PIC need to fill the all the requirement for make a job posting which is add picture, job position, company name, location, language preferences, educational level, years of working experience, working days, salary range and job description.
+> 3. After PIC fill in all the requirement then PIC can click button "POST !" to posting the job and they will going back to PIC dashboard.
+> 4. If PIC suddenly decided not to post the job, they can click button "BACK" beside the button "POST" to going back to PIC dashboard.
+
+2. **View and Update Application Status:** Access and read through the details and resume that applicant attach and decided to "Approve" or "Rejected" the applicant.
+> 1. PIC can review application details by clicking the button "APPLICANT" at the top bar header of their dashboard.
 > 2. 
 
 
