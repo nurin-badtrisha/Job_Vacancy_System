@@ -154,10 +154,10 @@
 		display: flex;
 		justify-content: flex-end;
 		margin-top: 5px;
-		gap: 15px; /* Adds space separating the Submit and Back buttons */
+		gap: 15px; 
 	}
 
-        /* ===== FIXED: Matches Back Button exactly in styling, borders, and size ===== */
+        
         .btn-submit {
             background-color: #4A154B;
             color: #FFFFFF;
