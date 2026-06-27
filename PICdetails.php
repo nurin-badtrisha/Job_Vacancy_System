@@ -1,19 +1,19 @@
 <?php
-// 1. Always include the connection file first so variables are available
+
 include ("dbconn.php");
 
-// 2. Enable error reporting to send text alerts cleanly instead of breaking JSON
-error_reporting(E_ALL);
-ini_set('display_errors', 0); // Kept at 0 for AJAX security, errors captured manually below
 
-// 3. Handle AJAX Deletion Requests
+error_reporting(E_ALL);
+ini_set('display_errors', 0); 
+
+
 if (isset($_POST['action']) && $_POST['action'] == 'delete' && isset($_POST['id'])) {
     if (ob_get_length()) ob_clean();
     header('Content-Type: application/json');
     
     $company_id = intval($_POST['id']);
     
-    // CHANGED: Fixed to use $dbconn matching your main script configuration
+    
     if (!isset($dbconn) || $dbconn->connect_error) {
         echo json_encode(["status" => "error", "message" => "Database link missing or failed."]);
         exit;
@@ -27,7 +27,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'delete' && isset($_POST['id'
         if ($stmt->execute()) {
             echo json_encode(["status" => "success", "message" => "Record deleted successfully."]);
         } else {
-            // Check if failure is due to foreign key restrictions in other tables
+            
             echo json_encode(["status" => "error", "message" => "Execution failed: " . $stmt->error]);
         }
         $stmt->close();
@@ -39,7 +39,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'delete' && isset($_POST['id'
     exit; 
 }
 
-// 4. Fetch all current data from the 'company' table
+
 $sql = "SELECT * FROM company";
 $result = $dbconn->query($sql);
 ?>
@@ -78,7 +78,7 @@ $result = $dbconn->query($sql);
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
         }
 
-        /* Logo Interactive Box */
+        
         .logo-trigger-box {
             flex: 1;
             cursor: pointer;
@@ -127,7 +127,7 @@ $result = $dbconn->query($sql);
             text-decoration: underline;
         }
         
-        /* --- Main Content Card --- */
+        
         .container {
             width: 95%;
             max-width: 1100px;
@@ -146,7 +146,7 @@ $result = $dbconn->query($sql);
             gap: 25px;
         }
 
-        /* --- Search Bar --- */
+        
         .search-container {
             display: flex;
             align-items: center;
@@ -173,7 +173,7 @@ $result = $dbconn->query($sql);
             color: #333;
         }
 
-        /* --- Data Table --- */
+       
         .table-wrapper {
             border: 1px solid #b3a2f2;
             border-radius: 4px;
@@ -214,14 +214,14 @@ $result = $dbconn->query($sql);
             border-bottom: none;
         }
 
-        /* --- Visual Style When Row Is Edited --- */
+       
         tr.editing-row td.editable-cell {
             background-color: #ffffff; 
             box-shadow: inset 0 0 3px rgba(79, 15, 105, 0.4);
             color: #000;
         }
 
-        /* --- Action Controls Layout --- */
+       
         .action-cell-container {
             display: flex;
             align-items: center;
@@ -229,7 +229,7 @@ $result = $dbconn->query($sql);
             gap: 15px;
         }
 
-        /* --- Inline Action Buttons --- */
+      
         .btn-action-edit {
             color: #4f0f69;
             text-decoration: none;
@@ -264,7 +264,7 @@ $result = $dbconn->query($sql);
             text-decoration: underline;
         }
 
-        /* --- Action Button --- */
+        
         .btn-primary {
             display: inline-flex;
             align-items: center;
@@ -292,7 +292,7 @@ $result = $dbconn->query($sql);
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
         
-         /* --- Header Section --- */
+        
         header {
             background-color: #4f0f69; 
             color: white;
@@ -391,7 +391,7 @@ $result = $dbconn->query($sql);
 </div>
 
 <script>
-    // Dynamic Filter Script Logic
+   
     document.getElementById('searchInput').addEventListener('keyup', function() {
         const filterValue = this.value.toLowerCase().trim();
         const tableBody = document.getElementById('companyTableBody');
@@ -399,16 +399,16 @@ $result = $dbconn->query($sql);
         
         let visibleRowsCount = 0;
         
-        // Remove existing custom "No matching records found" rows if any exist
+       
         const customFallback = tableBody.querySelector('.custom-no-match-row');
         if (customFallback) customFallback.remove();
         
-        // Hide standard fallback row if we are searching
+        
         const basicFallback = tableBody.querySelector('.no-data-fallback');
         if (basicFallback) basicFallback.style.display = 'none';
 
         for (let i = 0; i < rows.length; i++) {
-            // Evaluates search criteria matches across Name, Email, Phone, and Address columns
+           
             const nameCell = rows[i].cells[0].textContent.toLowerCase();
             const emailCell = rows[i].cells[1].textContent.toLowerCase();
             const phoneCell = rows[i].cells[2].textContent.toLowerCase();
@@ -419,14 +419,14 @@ $result = $dbconn->query($sql);
                 phoneCell.includes(filterValue) || 
                 addressCell.includes(filterValue)) {
                 
-                rows[i].style.display = ""; // Display matched row
+                rows[i].style.display = ""; 
                 visibleRowsCount++;
             } else {
-                rows[i].style.display = "none"; // Hide non-matching row
+                rows[i].style.display = "none"; 
             }
         }
         
-        // If all records are filtered out, present a visual "No matching data found" alert message row
+        
         if (visibleRowsCount === 0 && rows.length > 0) {
             const noMatchRow = document.createElement('tr');
             noMatchRow.className = 'custom-no-match-row';
