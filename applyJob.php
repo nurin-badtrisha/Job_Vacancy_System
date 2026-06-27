@@ -2,7 +2,7 @@
 session_start();
 include("dbconn.php");
 
-// Change 'job_id' to 'id' to match the link parameter (?id=7)
+
 if (isset($_GET['id'])) {
     $job_id = mysqli_real_escape_string($dbconn, $_GET['id']);
 } else {
@@ -16,7 +16,7 @@ if (!$query) {
     die("Database Error: " . mysqli_error($dbconn));
 }
 
-// Check if the job actually exists in the database
+
 if (mysqli_num_rows($query) == 0) {
     die("Error: Job vacancy not found.");
 }
@@ -64,7 +64,7 @@ h1{
     color: #333;
 }
 
-/* ===== Description Paragraph Beautifier Styling ===== */
+
 .description-text {
     margin-top: 10px;
     font-size: 16px;
@@ -89,7 +89,7 @@ h1{
     color: #2d2525;
 }
 
-/* ===== Action Buttons Container Layout ===== */
+
 .form-actions-row {
     display: flex;
     align-items: center;
@@ -114,7 +114,7 @@ h1{
     transform: translateY(-2px);
 }
 
-/* ===== New Back Button Styles ===== */
+
 .back-btn {
     background: #d1c6ec;
     color: #2d2525;
