@@ -132,7 +132,6 @@ nav ul li a:hover{
             font-weight: bold;
         }
 
-        /* Main Content Container */
         .container {
             max-width: 800px;
             margin: 40px auto;
@@ -154,7 +153,6 @@ nav ul li a:hover{
             padding-bottom: 10px;
         }
 
-        /* Values Grid */
         .values-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -172,7 +170,6 @@ nav ul li a:hover{
             color: #333;
         }
 
-        /* Footer */
         footer {
             text-align: center;
             padding: 20px;
