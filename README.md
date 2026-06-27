@@ -1,6 +1,3 @@
-# Job_Vacancy_System
-Web-based job vacancy management system using PHP and MySQL
-
 # Job Vacancy System - User Manual
 
 This documentation provides a comprehensive guide on how to navigate and utilize the Job Vacancy System. The platform is divided into three distinct user perspectives: **Admin**, **Person In Charge (PIC)**, and **Applicant**.
