@@ -14,13 +14,13 @@ if(isset($_POST['Submit'])){
     $phone_number     = $_POST['phone'];
     $username         = $_POST['username'];
     $gender           = $_POST['gender'];
-    $password         = $_POST['password']; // Storing as plain text default
+    $password         = $_POST['password'];
     $address          = $_POST['address'];
     $state            = $_POST['state'];
     $city             = $_POST['city'];
     $postcode         = $_POST['postcode'];
 	
-    // Process profile picture file upload cleanly
+   
     if (isset($_FILES['profile_picture']) && $_FILES['profile_picture']['error'] === 0) {
         $imageName = $_FILES['profile_picture']['name'];
         $tmpName   = $_FILES['profile_picture']['tmp_name'];
