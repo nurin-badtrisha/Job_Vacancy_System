@@ -16,7 +16,7 @@
         background-color: #b9acf3;
     }
 
-    /* ===== Top Bar ===== */
+    
     .top-bar {
         background-color: #5a2d82;
         height: 70px;
@@ -46,7 +46,7 @@
         cursor: pointer;
     }
 
-    /* ===== Page Title ===== */
+   
     .page-title {
         max-width: 85%;
         margin: 40px auto 15px auto;
@@ -55,7 +55,7 @@
         font-weight: bold;
     }
 
-    /* ===== Form Card ===== */
+   
     .form-container {
         background-color: #512b7c;
         width: 85%;
@@ -67,14 +67,14 @@
         color: white;
     }
 
-    /* Outer layout split: profile on left, input grid on right */
+   
     .form-flex-wrapper {
         display: flex;
         gap: 40px;
         align-items: flex-start;
     }
 
-    /* Profile Avatar Container Layout */
+   
     .profile-upload-side {
         width: 220px;
         display: flex;
@@ -127,7 +127,7 @@
         background: rgba(255, 255, 255, 0.2);
     }
 
-    /* MODERN CSS GRID LAYOUT */
+  
     .form-grid {
         flex-grow: 1;
         display: grid;
@@ -140,12 +140,12 @@
         flex-direction: column;
     }
 
-    /* Force specific fields to capture full width row span */
+   
     .form-group.full-width {
         grid-column: span 2;
     }
 
-    /* 3-column sub-grid helper for items like State, City, Postcode */
+   
     .form-group.three-columns {
         grid-column: span 2;
         display: grid;
@@ -178,7 +178,7 @@
         box-shadow: 0 0 10px rgba(185, 172, 243, 0.5);
     }
 
-    /* Custom Radio styling container */
+   
     .radio-container {
         display: flex;
         align-items: center;
@@ -201,7 +201,7 @@
         margin-left: 0;
     }
 
-    /* ===== Submit Action Row ===== */
+   
     .action-container {
         display: flex;
         justify-content: flex-end;
@@ -226,7 +226,7 @@
         transform: translateY(-2px);
     }
 
-    /* Responsive Mobile UI Viewport settings */
+    
     @media (max-width: 900px) {
         .form-flex-wrapper {
             flex-direction: column;
@@ -399,7 +399,7 @@
 </form>
 
 <script>
-// Dynamic file upload reader interface to change preview instantly on screen
+
 const fileInput = document.getElementById('profileImageInput');
 const avatarPreview = document.getElementById('avatarPreview');
 
