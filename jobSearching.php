@@ -1,7 +1,6 @@
 <?php
 include("dbconn.php");
 
-/* ================= SEARCH & FILTER ================= */
 $search = "";
 $location = "";
 $salary = "";
@@ -25,12 +24,13 @@ if(isset($_GET['search'])){
         $query .= " AND job_location LIKE '%$location%'";
     }
 
+    
     if($salary != ""){
-        $query .= " AND salary_range >= '$salary'";
+        $query .= " AND CAST(salary_range AS UNSIGNED) >= " . intval($salary);
     }
 }
 
-/* latest post appear first */
+
 $query .= " ORDER BY posted_date DESC";
 
 $result = mysqli_query($dbconn, $query);
@@ -40,6 +40,7 @@ $result = mysqli_query($dbconn, $query);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Vacancy</title>
 
     <style>
@@ -54,7 +55,7 @@ $result = mysqli_query($dbconn, $query);
             background-color: #b7a9f0;
         }
 		
-		/* ===== Navigation Header ===== */
+		
 		.nav-header {
 			background-color: #4f0f69;
 			width: 100%;
@@ -77,7 +78,7 @@ $result = mysqli_query($dbconn, $query);
 			transform: translateX(-50%);
 		}
 
-		/* ===== Logo Button ===== */
+		
 		.logo-trigger-box {
 			cursor: pointer;
 			display: flex;
@@ -98,7 +99,7 @@ $result = mysqli_query($dbconn, $query);
 			object-fit: contain;
 		}
 
-		/* ===== Sidebar ===== */
+		
 		.sidebar-menu {
 			position: absolute;
 			top: 70px;
@@ -144,7 +145,7 @@ $result = mysqli_query($dbconn, $query);
 			margin: 10px 25px;
 		}
 
-        /* ===== Main ===== */
+       
         .main {
             padding: 60px 20px;
             text-align: center;
@@ -161,7 +162,7 @@ $result = mysqli_query($dbconn, $query);
             font-weight: bold;
         }
 
-        /* ===== Search Box ===== */
+        
         .search-box {
             width: 90%;
             max-width: 900px;
@@ -180,15 +181,20 @@ $result = mysqli_query($dbconn, $query);
             align-items: center;
         }
 
-        .search-box input,
-        .search-box select {
+        .search-box input {
             padding: 12px;
             border-radius: 10px;
             border: 1px solid #ccc;
             width: 220px;
+            outline: none;
+            font-size: 14px;
         }
 
-        /* ===== UPDATED: Search Button Styles (Matches Dark Purple Back Button) ===== */
+        .search-box input:focus {
+            border-color: #4A154B;
+        }
+
+       
         .search-btn {
             background-color: #4A154B;
             color: #FFFFFF;
@@ -203,10 +209,9 @@ $result = mysqli_query($dbconn, $query);
 
         .search-btn:hover {
             opacity: 0.9;
-            background-color: #4A154B; /* Maintains matching base color background */
         }
 
-        /* ===== Cards Container ===== */
+        
         .cards {
             display: flex;
             justify-content: center;
@@ -249,19 +254,12 @@ $result = mysqli_query($dbconn, $query);
             margin: 8px 0;
         }
 
-        .job-title {
-            font-size: 14px;
-            color: #444;
-            margin-bottom: 8px;
-        }
-
         .details {
             font-size: 13px;
             color: #666;
             margin-top: 5px;
         }
 
-        /* ===== UPDATED: Apply Job Button Styles (Matches Dark Purple Back Button) ===== */
         .apply-btn {
             width: 100%;
             margin-top: 12px;
@@ -328,13 +326,11 @@ $result = mysqli_query($dbconn, $query);
                    placeholder="Filter by location"
                    value="<?php echo htmlspecialchars($location); ?>">
 
-            <select name="salary">
-                <option value="">Salary Range</option>
-                <option value="1000" <?php if($salary == "1000") echo "selected"; ?>>RM1000+</option>
-                <option value="2000" <?php if($salary == "2000") echo "selected"; ?>>RM2000+</option>
-                <option value="3000" <?php if($salary == "3000") echo "selected"; ?>>RM3000+</option>
-                <option value="4000" <?php if($salary == "4000") echo "selected"; ?>>RM4000+</option>
-            </select>
+            <input type="number" 
+                   name="salary" 
+                   placeholder="Salary Range" 
+                   min="0"
+                   value="<?php echo htmlspecialchars($salary); ?>">
 
             <button type="submit" class="search-btn">
                 Search
