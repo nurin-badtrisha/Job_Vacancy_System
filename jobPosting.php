@@ -1,8 +1,6 @@
 <?php
-// Fix: Start the session at the very top to preserve the 'pic_id' 
 session_start();
 
-// Optional Security Check: If they somehow sneaked into this form without logging in, send them away
 if (!isset($_SESSION['username'])) {
     die("Error: Access denied. Please log in first.");
 }
@@ -26,12 +24,12 @@ body{
 }
 
 .main-container{
-    max-width:1200px;   /* control width */
-    margin:50px auto;   /* CENTER */
+    max-width:1200px;   
+    margin:50px auto;   
     padding:20px;
 }
 
-/* ===== Top Bar ===== */
+
 .top-bar {
     background-color: #5a2d82;
     height: 70px;
@@ -48,7 +46,7 @@ body{
     font-size: 22px;
 }
 
-/* Upload Box */
+
 .upload-container{
     display:flex;
     justify-content:center;
@@ -85,14 +83,14 @@ body{
     opacity:1;
 }
 
-/* Form Grid */
+
 .form-grid{
     display:grid;
     grid-template-columns:repeat(3,1fr);
     gap:30px 25px;
 }
 
-/* Form Group */
+
 .form-group label{
     font-size:24px;
     font-weight:bold;
@@ -100,11 +98,11 @@ body{
     margin-bottom:10px;
 }
 
-/* Button */
+
 .button-container{
     display:flex;
     justify-content:flex-end;
-    gap:15px; /* jarak antara button */
+    gap:15px; 
     margin-top:30px;
 }
 
