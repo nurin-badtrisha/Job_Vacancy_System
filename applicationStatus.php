@@ -2,14 +2,14 @@
 session_start();
 include("dbconn.php");
 
-// 1. Redirect to login if no applicant session exists
+
 if (!isset($_SESSION['username'])) {
     die("Error: Please log in as an applicant first to view your application progress.");
 }
 
 $username = $_SESSION['username'];
 
-// 2. Resolve the numeric applicant_id based on the active username session
+
 $id_query = "SELECT applicant_id FROM applicant WHERE username = '$username'";
 $id_result = mysqli_query($dbconn, $id_query);
 
@@ -19,8 +19,27 @@ if ($user_row = mysqli_fetch_assoc($id_result)) {
     die("Error: Applicant account not found in the database registry.");
 }
 
-// 3. Fetch applications linked to this user, pulling the job position and company name
-$sql = "SELECT aj.applicant_status AS status, jp.job_position, jp.company_name 
+
+if (isset($_POST['cancel_application_id'])) {
+    $job_id_to_cancel = intval($_POST['cancel_application_id']);
+    
+    
+    $delete_sql = "DELETE FROM apply_job WHERE applicant_id = ? AND job_id = ?";
+    $stmt = mysqli_prepare($dbconn, $delete_sql);
+    
+    if ($stmt) {
+        mysqli_stmt_bind_param($stmt, "ii", $applicant_id, $job_id_to_cancel);
+        if (mysqli_stmt_execute($stmt)) {
+            echo "<script>alert('Application deleted successfully.'); window.location.href='" . $_SERVER['PHP_SELF'] . "';</script>";
+        } else {
+            echo "<script>alert('Error deleting application: " . mysqli_error($dbconn) . "');</script>";
+        }
+        mysqli_stmt_close($stmt);
+    }
+}
+
+
+$sql = "SELECT aj.applicant_status AS status, jp.job_id, jp.job_position, jp.company_name 
         FROM apply_job aj
         JOIN job_posting jp ON aj.job_id = jp.job_id
         WHERE aj.applicant_id = '$applicant_id'
@@ -31,8 +50,8 @@ $query_result = mysqli_query($dbconn, $sql);
 $applications = [];
 if ($query_result) {
     while ($row = mysqli_fetch_assoc($query_result)) {
-        // Build the structure expected by your loop down below
         $applications[] = [
+            'job_id'    => $row['job_id'],
             'job_title' => $row['job_position'],
             'company'   => $row['company_name'],
             'status'    => $row['status']
@@ -73,33 +92,52 @@ if ($query_result) {
                     <div class="no-data-msg">You haven't applied for any jobs yet.</div>
                 <?php else: ?>
                     <?php foreach ($applications as $row): 
+                        $jobId = htmlspecialchars($row['job_id']);
                         $jobTitle = htmlspecialchars($row['job_title']);
                         $companyName = htmlspecialchars($row['company']);
                         $statusText = htmlspecialchars($row['status']);
                         
-                        // Select styling profile based on status text string data
+                        
                         $statusClass = 'status-in-progress';
                         $isApproved = false;
+                        $canDelete = false;
 
-                        if (strtolower($statusText) == 'rejected') {
+                      
+                        $normalizedStatus = strtolower($statusText);
+                        if ($normalizedStatus == 'rejected') {
                             $statusClass = 'status-rejected';
-                        } elseif (strtolower($statusText) == 'approve' || strtolower($statusText) == 'approved') {
+                        } elseif ($normalizedStatus == 'approve' || $normalizedStatus == 'approved') {
                             $statusClass = 'status-approve';
                             $isApproved = true;
+                        } elseif ($normalizedStatus == 'pending' || $normalizedStatus == 'in progress') {
+                            $statusClass = 'status-in-progress';
+                            $canDelete = true;
+                        } else {
+                            
+                            $canDelete = true;
                         }
                     ?>
                         <div class="status-box">
-                            <div class="company-name"><?php echo $companyName; ?></div>
-                            <span class="badge badge-applied">Applied</span>
-                            <div class="job-title"><?php echo $jobTitle; ?></div>
-                            <div class="process-text <?php echo $statusClass; ?>">
-                                <?php echo $statusText; ?>
+                            <div>
+                                <div class="company-name"><?php echo $companyName; ?></div>
+                                <span class="badge badge-applied">Applied</span>
+                                <div class="job-title"><?php echo $jobTitle; ?></div>
+                                <div class="process-text <?php echo $statusClass; ?>">
+                                    <?php echo $statusText; ?>
+                                </div>
+
+                                <?php if ($isApproved): ?>
+                                    <div class="interview-note">
+                                        We will reach you soon via email/whatapps for an interview meeting
+                                    </div>
+                                <?php endif; ?>
                             </div>
 
-                            <?php if ($isApproved): ?>
-                                <div class="interview-note">
-                                    we will reach you soon via email/whatapps for an interview meeting
-                                </div>
+                            <?php if ($canDelete): ?>
+                                <form method="POST" action="" onsubmit="return confirm('Are you sure you want to delete this application?');" style="margin-top: 10px; width: 100%;">
+                                    <input type="hidden" name="cancel_application_id" value="<?php echo $jobId; ?>">
+                                    <button type="submit" class="btn-card-delete">Delete</button>
+                                </form>
                             <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
@@ -130,7 +168,7 @@ if ($query_result) {
     </script>
 	
 	<style>
-        /* Base Reset & Styling Rules */
+        
         * {
             box-sizing: border-box;
             margin: 0;
@@ -146,7 +184,7 @@ if ($query_result) {
             align-items: center;
         }
 
-        /* Full Screen Top Navigation Bar */
+        
         .nav-header {
             background-color: #4f0f69; 
             width: 100%;
@@ -169,7 +207,7 @@ if ($query_result) {
             transform: translateX(-50%);
         }
 
-        /* Logo Interactive Box */
+        
         .logo-trigger-box {
             cursor: pointer;
             display: flex;
@@ -192,7 +230,7 @@ if ($query_result) {
             object-fit: contain;
         }
 
-        /* Floating Sidebar Menu Styling */
+        
         .sidebar-menu {
             position: absolute;
             top: 70px;
@@ -238,7 +276,7 @@ if ($query_result) {
             margin: 10px 25px;
         }
 
-        /* Workspace Grid Box Layout Containers */
+        
         .laptop-mockup-frame {
             width: 100%;
             max-width: 1100px;
@@ -269,7 +307,7 @@ if ($query_result) {
             align-items: center;
             gap: 12px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
-            justify-content: space-between; /* Keeps card spacing clean */
+            justify-content: space-between; 
         }
 
         .company-name {
@@ -307,7 +345,6 @@ if ($query_result) {
             text-transform: uppercase;
         }
 
-        /* Styling for the added interview message subtext */
         .interview-note {
             font-size: 0.8rem;
             color: #2a9d8f;
@@ -317,7 +354,26 @@ if ($query_result) {
             font-style: italic;
         }
 
-        /* Status colors */
+        
+        .btn-card-delete {
+            background: none;
+            border: none;
+            color: #c62828;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            margin-top: 4px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .btn-card-delete:hover {
+            color: #b71c1c;
+            text-decoration: underline;
+        }
+
+       
         .status-in-progress { color: #A0A0A0; }
         .status-rejected { color: #E76F51; }
         .status-approve { color: #2A9D8F; }
