@@ -4,15 +4,14 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-// 1. Include your database connection file
 include("dbconn.php");
 
-// 2. Enable error reporting to help you trace any connection anomalies
 error_reporting(E_ALL);
 ini_set('display_errors', 1); 
 
-// 3. Synchronized SQL Query matching your startit.sql schema exactly
+
 $query = "SELECT 
+
             a.full_name, 
             a.email, 
             j.job_position, 
@@ -39,16 +38,16 @@ $result = $dbconn->query($query);
         }
 
         body {
-            background-color: #b4a7d6; /* Light purple outer background */
+            background-color: #b4a7d6; 
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        /* --- FIXED: Header Section (Perfectly Synced with PIC Details) --- */
+       
         header {
-            background-color: #4f0f69; /* Dark purple header */
+            background-color: #4f0f69; 
             color: white;
             width: 100%;
             height: 70px;
@@ -82,7 +81,7 @@ $result = $dbconn->query($query);
             letter-spacing: 0.5px;
         }
 
-        /* Nav links sit inside the right container, matching picdetails layout rules */
+        
         .header-nav {
             display: flex;
             justify-content: flex-end;
@@ -102,7 +101,7 @@ $result = $dbconn->query($query);
             text-decoration: underline;
         }
 
-        /* --- Main Content Card --- */
+        
         .container {
             width: 95%;
             max-width: 1100px;
@@ -121,7 +120,7 @@ $result = $dbconn->query($query);
             gap: 25px;
         }
 
-        /* --- Search Bar --- */
+        
         .search-container {
             display: flex;
             align-items: center;
@@ -152,7 +151,7 @@ $result = $dbconn->query($query);
             color: #c5bdae;
         }
 
-        /* --- Data Table --- */
+        
         .table-wrapper {
             border: 1px solid #b3a2f2;
             border-radius: 4px;
@@ -191,7 +190,7 @@ $result = $dbconn->query($query);
             border-bottom: none;
         }
 
-        /* --- Action Button --- */
+       
         .btn-primary {
             display: inline-flex;
             align-items: center;
@@ -287,7 +286,7 @@ $result = $dbconn->query($query);
     </div>
 
 <script>
-    // Live Search Filter Sync
+   
     document.getElementById('reportSearch').addEventListener('keyup', function() {
         const value = this.value.toLowerCase().trim();
         const tableBody = document.getElementById('reportTableBody');
