@@ -1,20 +1,19 @@
 <?php
-include("dbconn.php"); // Ensure your main database connection configuration file is loaded
+include("dbconn.php");
 
 if (isset($_POST['submit'])) {
     
-    // 1. Capture the data inputs submitted from the HTML form elements
     $name    = trim($_POST['name']);
     $email   = trim($_POST['email']);
     $phone   = trim($_POST['phone']);
     $message = trim($_POST['message']);
     
-    // 2. Prepare the insert query matching your exact 'contact_messages' table structure
+    
     $sql = "INSERT INTO contact_messages (name, email, phone_number, message) VALUES (?, ?, ?, ?)";
     $stmt = mysqli_prepare($dbconn, $sql);
     
     if ($stmt) {
-        // "ssss" indicates four string parameter variables
+        
         mysqli_stmt_bind_param($stmt, "ssss", $name, $email, $phone, $message);
         $query_execute = mysqli_stmt_execute($stmt);
         
@@ -56,7 +55,7 @@ if (isset($_POST['submit'])) {
             flex-direction: column;
         }
 
-        /* ===== Top Bar ===== */
+        
         .top-bar {
             background-color: #4f0f69;
             height: 70px;
@@ -68,7 +67,7 @@ if (isset($_POST['submit'])) {
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
         }
 
-        /* FIXED: Removed cursor pointer, hover scaling, and highlights to make it unclickable */
+       
         .logo-box-static {
             flex: 1;
             display: flex;
@@ -96,7 +95,7 @@ if (isset($_POST['submit'])) {
             flex: 1; 
         }
 
-        /* ===== Center Flex Wrapper ===== */
+        
         .main-content {
             flex: 1;
             display: flex;
@@ -106,7 +105,7 @@ if (isset($_POST['submit'])) {
             width: 100%;
         }
 
-        /* ===== Form Container ===== */
+        
         .form-container {
             background-color: #512b7c;
             width: 90%;
@@ -161,7 +160,7 @@ if (isset($_POST['submit'])) {
             min-height: 100px;
         }
 		
-        /* ===== Buttons ===== */
+        
         .button-container {
             display: flex;
             justify-content: flex-start;
@@ -186,7 +185,7 @@ if (isset($_POST['submit'])) {
             color: white;
         }
 
-        /* Company Info */
+        
         .footer-info {
             margin-top: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.15);
