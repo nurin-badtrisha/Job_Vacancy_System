@@ -129,13 +129,12 @@ nav ul li a:hover{
     color:#d8c5ff;
 }
 
-/* Footer */
-        footer {
-            text-align: center;
-            padding: 20px;
-            color: #777;
-            font-size: 0.9rem;
-        }
+footer {
+	text-align: center;
+	padding: 20px;
+	color: #777;
+	font-size: 0.9rem;
+}
 		
 </style>
 </body>
