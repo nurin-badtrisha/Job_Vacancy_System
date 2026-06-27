@@ -102,7 +102,7 @@ if ($query_result) {
                         $isApproved = false;
                         $canDelete = false;
 
-                      
+                        // Check status normalized to lowercase
                         $normalizedStatus = strtolower($statusText);
                         if ($normalizedStatus == 'rejected') {
                             $statusClass = 'status-rejected';
@@ -113,7 +113,7 @@ if ($query_result) {
                             $statusClass = 'status-in-progress';
                             $canDelete = true;
                         } else {
-                            
+                            // Fallback default: if it's explicitly anything else, we assume it's pending/reviewable
                             $canDelete = true;
                         }
                     ?>
