@@ -1,23 +1,18 @@
 <?php
 session_start();
 
-/* =======================
-   DATABASE CONNECTION
-======================= */
+
 $conn = new mysqli("localhost", "root", "", "startit");
 if ($conn->connect_error) {
     die("DB Error: " . $conn->connect_error);
 }
 
-/* =======================
-   FETCH USER DATA (USERNAME LOOKUP BYPASS)
-======================= */
-// If your system tracks logged-in applicants by username
+
 if (isset($_SESSION['username'])) {
     $username = $conn->real_escape_string($_SESSION['username']);
     $sql = "SELECT * FROM applicant WHERE username = '$username'";
 } else {
-    // Backup fallback if username session isn't available
+    
     $applicant_id = $conn->real_escape_string($_SESSION['applicant_id'] ?? $_SESSION['user_id'] ?? '');
     $sql = "SELECT * FROM applicant WHERE applicant_id = '$applicant_id'";
 }
@@ -27,8 +22,7 @@ $result = $conn->query($sql);
 if ($result && $result->num_rows > 0) {
     $user = $result->fetch_assoc();
     
-    // CRUCIAL SYNC: Force save the precise applicant_id into the session 
-    // so updateprofileprocess.php can read it safely without errors.
+    
     $_SESSION['applicant_id'] = $user['applicant_id']; 
 } else {
     die("Error: Applicant record details could not be found for your active logged-in session. Please log out and log in again.");
@@ -56,7 +50,7 @@ if ($result && $result->num_rows > 0) {
             min-height: 100vh;
         }
 
-        /* ===== Navigation Header (Synced perfectly with Job Vacancy layout) ===== */
+        
         .nav-header {
             background-color: #4f0f69; 
             width: 100%;
@@ -70,7 +64,7 @@ if ($result && $result->num_rows > 0) {
             z-index: 10;
         }
 
-        /* Logo Interactive Box */
+        
         .logo-trigger-box {
             cursor: pointer;
             display: flex;
@@ -101,7 +95,7 @@ if ($result && $result->num_rows > 0) {
             transform: translateX(-50%);
         }
 		
-		/* Floating Sidebar Menu Styling */
+		
         .sidebar-menu {
             position: absolute;
             top: 70px;
@@ -245,7 +239,7 @@ if ($result && $result->num_rows > 0) {
             box-sizing: border-box;
         }
 
-        /* Layout Grid Helpers */
+       
         .full-width-row {
             grid-column: span 3; 
         }
@@ -410,7 +404,7 @@ if ($result && $result->num_rows > 0) {
         }
     });
 
-    // Handle instant client-side profile preview refresh
+   
     document.getElementById('profile_picture').addEventListener('change', function() {
         const file = this.files[0];
         if (file) {
