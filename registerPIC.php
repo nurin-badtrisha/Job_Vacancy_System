@@ -16,7 +16,7 @@
         background-color: #b4a7d6;;
     }
 
-    /* ===== Top Bar ===== */
+   
     .top-bar {
         background-color: #5a2d82;
         height: 70px;
@@ -45,7 +45,7 @@
         border-radius: 20px;
     }
 
-    /* ===== Page Title ===== */
+    
     .page-title {
         max-width: 85%;
         margin: 40px auto 15px auto;
@@ -54,7 +54,7 @@
         font-weight: bold;
     }
 
-    /* ===== Form Card ===== */
+   
     .form-container {
         background-color: #512b7c;
         width: 85%;
@@ -66,7 +66,7 @@
         color: white;
     }
 
-    /* FIXED: Using CSS Grid instead of Flexbox to keep elements perfectly uniform */
+   
     .form-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -78,7 +78,7 @@
         flex-direction: column;
     }
 
-    /* Force full width on specific fields */
+   
     .form-group.full-width {
         grid-column: span 2;
     }
@@ -108,7 +108,7 @@
         box-shadow: 0 0 10px rgba(185, 172, 243, 0.5);
     }
 
-    /* ===== Actions ===== */
+   
     .action-container {
         display: flex;
         justify-content: flex-end;
@@ -133,7 +133,7 @@
         transform: translateY(-2px);
     }
 
-    /* Responsive adjustments for phones/tablets */
+   
     @media (max-width: 768px) {
         .form-grid {
             grid-template-columns: 1fr;
@@ -147,9 +147,9 @@
         }
     }
 	
-	 /* --- Header Section --- */
+	 
         header {
-            background-color: #4f0f69; /* Dark purple header */
+            background-color: #4f0f69; 
             color: white;
             width: 100%;
             padding: 15px 40px;
