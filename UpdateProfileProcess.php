@@ -50,7 +50,7 @@ if (isset($_POST['update'])) {
         }
     }
 
-    // FIX: Removed password_hash() to pass the raw password text directly
+   
     $password_query = "";
     if (!empty($_POST['password'])) {
         $plain_password = $conn->real_escape_string($_POST['password']);
