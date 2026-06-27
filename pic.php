@@ -11,7 +11,7 @@ if ($conn->connect_error) {
     die("Connection to database failed: " . $conn->connect_error);
 }
 
-// 1. SECURITY CHECK: Verify the PIC is authenticated
+
 if (!isset($_SESSION['username'])) {
     header("Location: Login.php");
     exit();
@@ -19,7 +19,7 @@ if (!isset($_SESSION['username'])) {
 
 $session_username = $_SESSION['username'];
 
-// 2. IDENTITY LOOKUP: Fetch the current logged-in PIC's unique pic_id from the database
+
 $safe_username = $conn->real_escape_string($session_username);
 $pic_query = "SELECT pic_id FROM person_in_charge WHERE username = '$safe_username'";
 $pic_result = $conn->query($pic_query);
@@ -31,13 +31,11 @@ if ($pic_result && $pic_result->num_rows > 0) {
     die("Error: Person In Charge identity could not be verified in the registry.");
 }
 
-/* ==========================================
-   BACKEND ACTION: HANDLE INLINE DELETION REQUESTS
-   ========================================== */
+
 if (isset($_POST['delete_job_id'])) {
     $delete_id = intval($_POST['delete_job_id']);
     
-    // Ensure they can only delete a post if it actually belongs to them
+    
     $delete_sql = "DELETE FROM job_posting WHERE job_id = ? AND pic_id = ?";
     $stmt = $conn->prepare($delete_sql);
     
@@ -78,7 +76,7 @@ if (isset($_POST['delete_job_id'])) {
             width: 100%;
         }
 
-        /* --- LEFT SIDE STYLING --- */
+        
         .left-col {
             width: 50%;
             background-color: #FAF6F0; 
@@ -138,7 +136,7 @@ if (isset($_POST['delete_job_id'])) {
             z-index: 1;
         }
 
-        /* --- RIGHT SIDE STYLING --- */
+        
         .right-col {
             width: 50%;
             background-color: #B4A4EB; 
@@ -311,7 +309,7 @@ if (isset($_POST['delete_job_id'])) {
                 <h2 class="section-title">History Post</h2>
 
                 <?php
-                // 3. FIXED FILTER QUERY: Isolates history list items matching ONLY the current PIC's tracking index
+                
                 $query = "SELECT * FROM job_posting WHERE pic_id = '$current_pic_id' ORDER BY job_id DESC"; 
                 $result = $conn->query($query); 
 
