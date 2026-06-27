@@ -4,35 +4,31 @@ $username   = "root";
 $password   = ""; 
 $dbname     = "startit";
 
-// Establish Database Connection
+
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Process the status update action safely
+
 $message = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $applicant_id = intval($_POST['applicant_id']);
     $job_id = intval($_POST['job_id']);
-    $status = $_POST['status'];
+    $status = $conn->real_escape_string($_POST['status']);
 
-    // Updates using explicit column names matching apply_job
-    $stmt = $conn->prepare("UPDATE apply_job SET applicant_status = ? WHERE applicant_id = ? AND job_id = ?");
-    $stmt->bind_param("sii", $status, $applicant_id, $job_id);
     
-    if ($stmt->execute()) {
-        $message = "<script>alert('Status updated successfully!');</script>";
+    $update_query = "UPDATE apply_job SET applicant_status = '$status' WHERE applicant_id = $applicant_id AND job_id = $job_id";
+    
+    if ($conn->query($update_query)) {
+        $message = "<script>alert('Status updated successfully!'); window.location.href='" . $_SERVER['PHP_SELF'] . "';</script>";
     } else {
-        $message = "<script>alert('Failed to update status.');</script>";
+        $message = "<script>alert('Failed to update status: " . $conn->error . "');</script>";
     }
-    $stmt->close();
 }
 
-/* SQL relational JOIN matching your database schema:
-  Fetches explicit columns to preserve your exact visual table columns 
-*/
+
 $query = "SELECT 
             aj.applicant_id,
             aj.job_id,
@@ -90,7 +86,6 @@ $result = $conn->query($query);
         }
 
         .header-title {
-            flex: 1;
             color: white;
             font-size: 24px;
             font-weight: bold;
@@ -307,7 +302,6 @@ $result = $conn->query($query);
                     <?php
                     if ($result && $result->num_rows > 0) {
                         while ($row = $result->fetch_assoc()) {
-                            // Read current status value or force the default to lowercase pending
                             $current_status = strtolower($row['applicant_status'] ?? 'pending');
                             if (!in_array($current_status, ['pending', 'approved', 'rejected'])) {
                                 $current_status = 'pending';
@@ -358,7 +352,6 @@ $result = $conn->query($query);
 </div>
 
 <script>
-    // Live color feedback adjustments for status dropdown selections
     function updateStatusStyle(selectElement) {
         selectElement.classList.remove('pending', 'approved', 'rejected');
         if (selectElement.value === 'pending') {
@@ -370,7 +363,6 @@ $result = $conn->query($query);
         }
     }
 
-    // Interactive front-end filter engine
     function filterTable() {
         const input = document.getElementById("tableSearch");
         const filter = input.value.toLowerCase();
@@ -383,7 +375,6 @@ $result = $conn->query($query);
             let matchFound = false;
             const cells = rows[i].getElementsByTagName("td");
             
-            // Filters down interactive searchable strings: Name, Position, Email and Phone Info
             for(let j = 0; j < 4; j++) {
                 if (cells[j]) {
                     const textValue = cells[j].textContent || cells[j].innerText;
@@ -399,4 +390,6 @@ $result = $conn->query($query);
 </script>
 </body>
 </html>
-<?php $conn->close(); ?>
+<?php 
+$conn->close(); 
+?>
